@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model order {
+  id          Int          @id @default(autoincrement())
+  userId      Int
+  totalAmount Decimal      @db.Decimal(10, 2)
+  status      order_status
+  createdAt   DateTime     @default(now())
+  user        user         @relation(fields: [userId], references: [id], map: "Order_userId_fkey")
+  orderitem   orderitem[]
+
+  @@index([userId], map: "Order_userId_fkey")
+}
+
+model orderitem {
+  id        Int     @id @default(autoincrement())
+  orderId   Int
+  productId Int
+  quantity  Int
+  price     Decimal @db.Decimal(10, 2)
+  order     order   @relation(fields: [orderId], references: [id], map: "OrderItem_orderId_fkey")
+  product   product @relation(fields: [productId], references: [id], map: "OrderItem_productId_fkey")
+
+  @@index([orderId], map: "OrderItem_orderId_fkey")
+  @@index([productId], map: "OrderItem_productId_fkey")
+}
+
+model product {
+  id                        Int            @id @default(autoincrement())
+  name                      String
+  description               String?
+  price                     Decimal        @db.Decimal(10, 2)
+  type                      product_type   @default(PROFILE)
+  imageUrl                  String
+  profileFile               String?        @db.Text
+  createdAt                 DateTime       @default(now())
+  isUsed                    Boolean        @default(false)
+  updatedAt                 DateTime
+  userId                    Int?
+  orderitem                 orderitem[]
+  user_product_userIdTouser user?          @relation("product_userIdTouser", fields: [userId], references: [id], map: "Product_userId_fkey")
+  productstock              productstock[]
+  stock                     stock[]
+  user_userproducts         user[]         @relation("userproducts")
+
+  @@index([userId], map: "Product_userId_fkey")
+}
+
+model productstock {
+  id        Int      @id @default(autoincrement())
+  productId Int
+  content   String
+  isUsed    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  product   product  @relation(fields: [productId], references: [id], map: "ProductStock_productId_fkey")
+
+  @@index([productId], map: "ProductStock_productId_fkey")
+}
+
+model stock {
+  id        Int     @id @default(autoincrement())
+  productId Int
+  content   String
+  isUsed    Boolean @default(false)
+  product   product @relation(fields: [productId], references: [id], map: "Stock_productId_fkey")
+
+  @@index([productId], map: "Stock_productId_fkey")
+}
+
+model user {
+  id                           Int       @id @default(autoincrement())
+  name                         String
+  email                        String    @unique(map: "User_email_key")
+  password                     String
+  balance                      Decimal   @default(0.00) @db.Decimal(10, 2)
+  isAdmin                      Boolean   @default(false)
+  createdAt                    DateTime  @default(now())
+  order                        order[]
+  product_product_userIdTouser product[] @relation("product_userIdTouser")
+  product_userproducts         product[] @relation("userproducts")
+}
+
+enum order_status {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+enum product_type {
+  PROFILE
+  PROXY
+}
