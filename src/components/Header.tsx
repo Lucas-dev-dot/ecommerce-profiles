@@ -5,7 +5,7 @@ import { useSession, signOut } from 'next-auth/react'
 import { useState, useEffect } from 'react'
 import { useCart } from '@/contexts/CartContext'
 import { ShoppingCart } from 'lucide-react'
-import { ProductType } from '@prisma/client'
+// import { ProductType } from '@prisma/client'
 import { CartItem } from '../types'
 import { Decimal } from 'decimal.js'
 

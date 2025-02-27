@@ -41,16 +41,7 @@ export default function ManageProducts() {
 
   return (
     <div className="container mx-auto p-4">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Gerenciar Produtos</h1>
-        <Link 
-          href="/admin/products/new" 
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          Novo Produto
-        </Link>
-      </div>
-
+      
       <div className="grid gap-4">
         {products.map((product) => (
           <div 

@@ -3,8 +3,8 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   images: {
-    domains: ['images.unsplash.com'], // Adiciona o domínio do Unsplash
+    domains: ['images.unsplash.com', 'images.pexels.com', 'via.placeholder.com'], // Adicione 'via.placeholder.com' aqui
   },
 }
 
-module.exports = nextConfig
+export default nextConfig

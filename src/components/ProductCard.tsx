@@ -1,6 +1,6 @@
 'use client'
-import type { Product as PrismaProduct, ProductType } from '@prisma/client/edge'
-import { useCart } from '@contexts/CartContext'
+import type { Product as PrismaProduct, product_type } from '@prisma/client/edge'
+import { useCart } from '@/contexts/CartContext'
 import Image from 'next/image'
 import { useState } from 'react'
 import { useSession } from 'next-auth/react'
@@ -12,7 +12,7 @@ interface Product {
   name: string
   description: string
   price: any
-  type: ProductType
+  type: product_type
   imageUrl?: string
   profileFile?: string | null
   stock?: number

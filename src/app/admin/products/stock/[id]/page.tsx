@@ -1,11 +1,11 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, ChangeEvent } from 'react'
 import { useRouter } from 'next/navigation'
 
 export default function ManageStock({ params }: { params: { id: string } }) {
   const router = useRouter()
   const [product, setProduct] = useState<any>(null)
-  const [stockCount, setStockCount] = useState(0)
+  const [stockCount, setStockCount] = useState<number>(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [addingStock, setAddingStock] = useState(false)
@@ -29,31 +29,41 @@ export default function ManageStock({ params }: { params: { id: string } }) {
     }
   }
 
-  const handleAddStock = async () => {
+  const handleFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     try {
-      setAddingStock(true)
+      const file = event.target.files?.[0];
+      if (!file) return;
+  
+      const content = await file.text();
+      console.log('Content being sent:', content);
+  
       const response = await fetch(`/api/admin/products/${params.id}/stock`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ quantity: 1 })
-      })
-
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error)
+        body: JSON.stringify({ content }),
+        credentials: 'include'
+      });
+  
+      // Log the response for debugging
+      console.log('Response status:', response.status);
+      console.log('Response ok:', response.ok);
+  
+      const data = await response.json();
+      
+      if (response.ok) {
+        alert(`${data.items?.length || 0} perfis adicionados com sucesso!`);
+        router.refresh();
+      } else {
+        throw new Error(data.error || 'Falha ao adicionar perfis');
       }
-
-      await loadProduct() // Recarrega os dados do produto
-      alert('Estoque adicionado com sucesso!')
+  
     } catch (error) {
-      console.error('Erro ao adicionar estoque:', error)
-      setError('Erro ao adicionar estoque')
-    } finally {
-      setAddingStock(false)
+      console.error('Upload error:', error);
+      alert('Erro ao adicionar perfis. Verifique o console para mais detalhes.');
     }
-  }
+  };
 
   if (loading) return <div className="p-4">Carregando...</div>
   if (error) return <div className="p-4 text-red-600">{error}</div>
@@ -75,27 +85,35 @@ export default function ManageStock({ params }: { params: { id: string } }) {
           </p>
         </div>
 
-        <div className="flex gap-4">
-          <button
-            onClick={handleAddStock}
-            disabled={addingStock}
-            className={`px-4 py-2 rounded ${
-              addingStock
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-green-500 hover:bg-green-600'
-            } text-white`}
-          >
-            {addingStock ? 'Adicionando...' : 'Adicionar ao Estoque'}
-          </button>
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-4">
+            <label htmlFor="fileUpload" className="sr-only">Carregar arquivo</label>
+            <input
+              id="fileUpload"
+              type="file"
+              accept=".txt"
+              onChange={handleFileUpload}
+              className="block w-full text-sm text-gray-500
+                file:mr-4 file:py-2 file:px-4
+                file:rounded-full file:border-0
+                file:text-sm file:font-semibold
+                file:bg-violet-50 file:text-violet-700
+                hover:file:bg-violet-100"
+              aria-label="Selecione um arquivo para upload"
+            />
+          </div>
 
-          <button
-            onClick={() => router.push('/admin/products/manage')}
-            className="px-4 py-2 rounded bg-gray-500 hover:bg-gray-600 text-white"
-          >
-            Voltar
-          </button>
+          <div className="flex gap-4">
+            <button
+              onClick={() => router.push('/admin/products/manage')}
+              className="px-4 py-2 rounded bg-gray-500 hover:bg-gray-600 text-white"
+            >
+              Voltar
+            </button>
+          </div>
         </div>
       </div>
     </div>
   )
-} 
+
+}

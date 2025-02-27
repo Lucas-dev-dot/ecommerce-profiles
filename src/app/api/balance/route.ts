@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import prisma from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { NextResponse } from 'next/server'
 
@@ -19,7 +19,13 @@ export async function GET() {
       return NextResponse.json({ error: 'Usuário não encontrado' }, { status: 404 })
     }
 
-    return NextResponse.json({ balance: user.balance })
+    const products = await prisma.product.findMany({
+      where: {
+        type: 'PROFILE',
+      },
+    })
+
+    return NextResponse.json({ balance: user.balance, products })
   } catch (error) {
     console.error('Erro ao buscar saldo:', error)
     return NextResponse.json(

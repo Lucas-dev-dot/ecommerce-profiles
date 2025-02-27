@@ -7,85 +7,97 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model order {
-  id          Int          @id @default(autoincrement())
-  userId      Int
+enum product_type {
+  PROFILE
+  PROXY
+}
+
+model User {
+  id                   Int       @id @default(autoincrement())
+  name                 String
+  email                String    @unique(map: "User_email_key")
+  password             String
+  balance              Decimal   @default(0.00) @db.Decimal(10, 2)
+  isAdmin              Boolean   @default(false)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  orders               Order[]   @relation("UserOrders")
+  product_userproducts Product[] @relation("UserProducts")
+  products             Product[] @relation("UserProducts2")
+  stock                Stock[]   @relation("UserStock")
+}
+
+model Product {
+  id                        Int            @id @default(autoincrement())
+  name                      String
+  description               String?
+  price                     Decimal        @db.Decimal(10, 2)
+  type                      product_type
+  imageUrl                  String?
+  profileFile               String?
+  createdAt                 DateTime       @default(now())
+  updatedAt                 DateTime       @updatedAt
+  isUsed                    Boolean        @default(false)
+  userId                    Int?
+  orderitem                 OrderItem[]    @relation("ProductOrderItems")
+  user_product_userIdTouser User[]         @relation("UserProducts")
+  user                      User?          @relation("UserProducts2", fields: [userId], references: [id])
+  productstock              ProductStock[]
+  stock                     Stock[]        
+
+  @@index([userId], map: "Product_userId_fkey")
+}
+
+model Order {
+  id         Int          @id @default(autoincrement())
+  userId     Int
   totalAmount Decimal      @db.Decimal(10, 2)
   status      order_status
   createdAt   DateTime     @default(now())
-  user        user         @relation(fields: [userId], references: [id], map: "Order_userId_fkey")
-  orderitem   orderitem[]
+  updatedAt   DateTime     @updatedAt
+  user        User         @relation("UserOrders", fields: [userId], references: [id])
+  orderitem   OrderItem[]  @relation("OrderItems")
 
   @@index([userId], map: "Order_userId_fkey")
 }
 
-model orderitem {
-  id        Int     @id @default(autoincrement())
+model OrderItem {
+  id        Int      @id @default(autoincrement())
   orderId   Int
   productId Int
   quantity  Int
-  price     Decimal @db.Decimal(10, 2)
-  order     order   @relation(fields: [orderId], references: [id], map: "OrderItem_orderId_fkey")
-  product   product @relation(fields: [productId], references: [id], map: "OrderItem_productId_fkey")
+  price     Decimal  @db.Decimal(10, 2)
+  order     Order    @relation("OrderItems", fields: [orderId], references: [id])
+  product   Product  @relation("ProductOrderItems", fields: [productId], references: [id])
 
   @@index([orderId], map: "OrderItem_orderId_fkey")
   @@index([productId], map: "OrderItem_productId_fkey")
 }
 
-model product {
-  id                        Int            @id @default(autoincrement())
-  name                      String
-  description               String?
-  price                     Decimal        @db.Decimal(10, 2)
-  type                      product_type   @default(PROFILE)
-  imageUrl                  String
-  profileFile               String?        @db.Text
-  createdAt                 DateTime       @default(now())
-  isUsed                    Boolean        @default(false)
-  updatedAt                 DateTime
-  userId                    Int?
-  orderitem                 orderitem[]
-  user_product_userIdTouser user?          @relation("product_userIdTouser", fields: [userId], references: [id], map: "Product_userId_fkey")
-  productstock              productstock[]
-  stock                     stock[]
-  user_userproducts         user[]         @relation("userproducts")
-
-  @@index([userId], map: "Product_userId_fkey")
-}
-
-model productstock {
+model ProductStock {
   id        Int      @id @default(autoincrement())
   productId Int
   content   String
   isUsed    Boolean  @default(false)
   createdAt DateTime @default(now())
-  updatedAt DateTime
-  product   product  @relation(fields: [productId], references: [id], map: "ProductStock_productId_fkey")
+  updatedAt DateTime @updatedAt
+  product   Product  @relation(fields: [productId], references: [id], map: "ProductStock_productId_fkey")
 
   @@index([productId], map: "ProductStock_productId_fkey")
 }
 
-model stock {
-  id        Int     @id @default(autoincrement())
+model Stock {
+  id        Int      @id @default(autoincrement())
   productId Int
   content   String
-  isUsed    Boolean @default(false)
-  product   product @relation(fields: [productId], references: [id], map: "Stock_productId_fkey")
+  isUsed    Boolean  @default(false)
+  quantity  Int      @default(1)
+  userId    Int?     // Make it optional
+  product   Product  @relation(fields: [productId], references: [id])
+  user      User?    @relation("UserStock", fields: [userId], references: [id]) // Make it optional and use userId
 
   @@index([productId], map: "Stock_productId_fkey")
-}
-
-model user {
-  id                           Int       @id @default(autoincrement())
-  name                         String
-  email                        String    @unique(map: "User_email_key")
-  password                     String
-  balance                      Decimal   @default(0.00) @db.Decimal(10, 2)
-  isAdmin                      Boolean   @default(false)
-  createdAt                    DateTime  @default(now())
-  order                        order[]
-  product_product_userIdTouser product[] @relation("product_userIdTouser")
-  product_userproducts         product[] @relation("userproducts")
+  @@index([userId])   // Add index for userId
 }
 
 enum order_status {
@@ -94,7 +106,8 @@ enum order_status {
   CANCELLED
 }
 
-enum product_type {
+enum ProductType {
   PROFILE
   PROXY
+  // Adicione outros tipos conforme necessário
 }

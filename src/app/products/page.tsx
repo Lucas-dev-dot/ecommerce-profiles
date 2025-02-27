@@ -1,58 +1,65 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useCart } from '@/src/contexts/CartContext'
-import type { Product } from '@prisma/client/edge'
-import { ProductCard } from '@/src/components/ProductCard'
+import { useCart } from '@/contexts/CartContext'
+import { Product as PrismaProduct, product_type } from '@prisma/client/edge'
+import { ProductCard } from '@/components/ProductCard'
+
+interface Product {
+  id: number;
+  name: string;
+  price: number;
+  description: string;
+  type: product_type;
+}
 
 export default function Products() {
-  const [profiles, setProfiles] = useState<Product[]>([])
-  const [proxies, setProxies] = useState<Product[]>([])
+  const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const { addItem } = useCart()
 
   useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const response = await fetch('/api/products')
+        if (!response.ok) {
+          throw new Error('Erro ao carregar produtos')
+        }
+        const data = await response.json()
+        setProducts(data)
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          setError(error.message) // Acesse o `message` do erro
+        } else {
+          setError('Erro desconhecido') // Caso o erro não seja do tipo `Error`
+        }
+      } finally {
+        setLoading(false)
+      }
+    }
+
     loadProducts()
   }, [])
 
-  async function loadProducts() {
-    try {
-      setLoading(true)
-      setError('')
-
-      // Carregar perfis e proxies em paralelo
-      const [profilesResponse, proxiesResponse] = await Promise.all([
-        fetch('/api/products'),
-        fetch('/api/admin/proxies')
-      ])
-
-      if (!profilesResponse.ok || !proxiesResponse.ok) {
-        throw new Error('Erro ao carregar produtos')
-      }
-
-      const profilesData = await profilesResponse.json()
-      const proxiesData = await proxiesResponse.json()
-
-      setProfiles(profilesData)
-      setProxies(proxiesData)
-    } catch (error) {
-      console.error('Erro:', error)
-      setError('Erro ao carregar produtos')
-    } finally {
-      setLoading(false)
-    }
-  }
+  if (loading) return <div>Carregando...</div>
+  if (error) return <div>{error}</div>
 
   return (
     <div className="space-y-12">
       <section>
         <h2 className="text-2xl font-semibold mb-6">Perfis</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {profiles.map((product) => (
+          {products.map((product) => (
             <ProductCard
               key={product.id}
-              product={product}
+              product={{
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                description: product.description,
+                type: product.type,
+              }}
             />
           ))}
         </div>
@@ -61,14 +68,20 @@ export default function Products() {
       <section>
         <h2 className="text-2xl font-semibold mb-6">Proxies</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {proxies.map((product) => (
+          {products.map((product) => (
             <ProductCard
               key={product.id}
-              product={product}
+              product={{
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                description: product.description,
+                type: product_type.PROXY,
+              }}
             />
           ))}
         </div>
       </section>
     </div>
   )
-} 
+}

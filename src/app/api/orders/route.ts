@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import prisma from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { NextResponse } from 'next/server'
 
@@ -57,7 +57,7 @@ export async function POST(request: Request) {
           userId: user.id,
           totalAmount,
           status: 'COMPLETED',
-          orderItems: {
+          orderitem: {
             create: items.map((item: any) => ({
               productId: item.productId,
               quantity: item.quantity,
@@ -66,7 +66,7 @@ export async function POST(request: Request) {
           }
         },
         include: {
-          orderItems: {
+          orderitem: {
             include: {
               product: true
             }
@@ -122,7 +122,7 @@ export async function GET() {
         }
       },
       include: {
-        orderItems: {
+        orderitem: {
           include: {
             product: true
           }

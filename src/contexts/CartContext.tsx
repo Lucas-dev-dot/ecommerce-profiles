@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import type { Product } from '@prisma/client';
 import { Decimal } from 'decimal.js';
-import type { ProductType } from '@/types';
+import type { product_type } from '@prisma/client/edge';
 
 interface CartItem {
   id: number;
@@ -44,10 +44,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     id: number; 
     description: string | null; 
     price: Decimal; 
-    type: ProductType;
+    type: product_type;
     createdAt: Date; 
     updatedAt: Date; 
-    imageUrl: string; 
+    imageUrl: string | null; 
     profileFile: string | null; 
     isUsed: boolean; 
     userId: number | null; 

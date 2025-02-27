@@ -1,4 +1,4 @@
-import { prisma } from '@/src/lib/prisma'
+import   prisma from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { NextResponse } from 'next/server'
 
@@ -13,15 +13,10 @@ export async function GET(
   }
 
   try {
-    const order = await prisma.order.findFirst({
-      where: {
-        id: parseInt(params.orderId),
-        user: {
-          email: session.user.email!
-        }
-      },
+    const order = await prisma.order.findUnique({
+      where: { id: parseInt(params.orderId) },
       include: {
-        orderItems: {
+        orderitem: {
           include: {
             product: {
               select: {
@@ -42,7 +37,7 @@ export async function GET(
     // Adicionar URLs de download para os perfis
     const orderWithDownloads = {
       ...order,
-      orderItems: order.orderItems.map((item: { product: { type: string }; id: any }) => ({
+      orderItems: order.orderitem.map((item: { product: { type: string }; id: any }) => ({
         ...item,
         downloadUrl: item.product.type === 'PROFILE' 
           ? `/api/downloads/${item.id}` // URL para download do perfil

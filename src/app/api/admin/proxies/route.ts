@@ -1,7 +1,7 @@
-import { prisma } from '@/src/lib/prisma'
+import prisma from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { NextResponse } from 'next/server'
-import { authOptions } from '@/src/lib/auth'
+import { authOptions } from '@/lib/auth'
 
 export async function GET() {
   const session = await getServerSession(authOptions)
@@ -48,14 +48,16 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { name, price, proxyContent } = await request.json()
+    const { name, price, proxyContent, imageUrl } = await request.json()
 
     const proxy = await prisma.product.create({
       data: {
         name,
         price,
         type: 'PROXY',
-        profileFile: proxyContent, // Usando o mesmo campo para conteúdo do proxy
+        description: '',
+        profileFile: proxyContent,
+        imageUrl,
         isUsed: false,
         createdAt: new Date(),
         updatedAt: new Date()

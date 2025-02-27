@@ -1,4 +1,4 @@
-import { prisma } from '@/src/lib/prisma'
+import prisma from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { NextResponse } from 'next/server'
 
@@ -15,16 +15,16 @@ export async function GET() {
         isAdmin: false // Excluir admins da lista
       },
       include: {
-        orders: {
+        order: {
           include: {
-            orderItems: {
+            orderitem: {
               include: {
                 product: true
               }
             }
           }
         },
-        products: true // Produtos comprados pelo usuário
+        product_userproducts: true // Ensure this matches the relation name in your schema
       },
       orderBy: {
         createdAt: 'desc'

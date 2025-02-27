@@ -1,7 +1,7 @@
 'use client'
 
 import { ProductCard } from './ProductCard'
-import type { ProductType } from '@prisma/client/edge'
+import type { product_type } from '@prisma/client/edge'
 import { useEffect, useState } from 'react'
 
 interface Product {
@@ -9,7 +9,7 @@ interface Product {
   name: string
   description: string
   price: any
-  type: ProductType
+  type: product_type
   imageUrl?: string
   profileFile?: string | null
   stock?: number
