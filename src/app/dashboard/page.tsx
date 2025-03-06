@@ -3,13 +3,45 @@
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import type { Order } from '.prisma/client'
+import type { Order as PrismaOrder } from '.prisma/client'
+
+interface Product {
+  id: number
+  name: string
+  type: string
+}
+
+interface OrderItem {
+  id: number
+  product: Product
+}
+
+interface OrderWithItems extends PrismaOrder {
+  orderItems: OrderItem[]
+}
 
 export default function Dashboard() {
   const { data: session } = useSession()
   const router = useRouter()
-  const [orders, setOrders] = useState<Order[]>([])
+  const [orders, setOrders] = useState<OrderWithItems[]>([])
   const [loading, setLoading] = useState(true)
+  const handleDownload = async (orderItemId: number) => {
+    try {
+      const response = await fetch(`/api/download/${orderItemId}`)
+      if (!response.ok) throw new Error('Erro ao baixar arquivo')
+      
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `profile-${orderItemId}.txt`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error('Erro ao baixar arquivo:', error)
+    }
+  }
 
   useEffect(() => {
     if (!session) {
@@ -58,6 +90,21 @@ export default function Dashboard() {
                 <p><strong>Data:</strong> {new Date(order.createdAt).toLocaleDateString()}</p>
                 <p><strong>Valor:</strong> R$ {Number(order.totalAmount).toFixed(2)}</p>
                 <p><strong>Status:</strong> {order.status}</p>
+
+
+                {order.orderItems && order.orderItems.map((item) => (
+                  <div key={item.id} className="mt-2">
+                    <p>{item.product.name}</p>
+                    {item.product.type === 'PROFILE' && (
+                      <button
+                        onClick={() => handleDownload(item.id)}
+                        className="mt-2 bg-red-700 text-white px-4 py-2 rounded text-sm hover:bg-red-800"
+                      >
+                        Download Perfil
+                      </button>
+                    )}
+                  </div>
+                ))}
               </div>
             ))}
           </div>
@@ -65,4 +112,4 @@ export default function Dashboard() {
       </div>
     </div>
   )
-} 
+}

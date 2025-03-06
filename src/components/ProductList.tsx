@@ -59,7 +59,11 @@ export default function ProductList({ products }: ProductListProps) {
           {profiles.map((product) => (
             <ProductCard 
               key={`profile-${product.id}`} 
-              product={product}
+              product={{
+                ...product,
+                id: product.id.toString(),
+                price: Number(product.price)
+              }}
             />
           ))}
         </div>
@@ -75,7 +79,11 @@ export default function ProductList({ products }: ProductListProps) {
           {proxies.map((product) => (
             <ProductCard 
               key={`proxy-${product.id}`} 
-              product={product}
+              product={{
+                ...product,
+                id: product.id.toString(),
+                price: Number(product.price)
+              }}
             />
           ))}
         </div>

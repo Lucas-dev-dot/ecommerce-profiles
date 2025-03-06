@@ -8,6 +8,7 @@ import Link from 'next/link'
 export default function Login() {
   const router = useRouter()
   const [error, setError] = useState('')
+  const [forgotPassword, setForgotPassword] = useState(false)
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -22,9 +23,20 @@ export default function Login() {
     if (result?.error) {
       setError('Email ou senha inválidos')
     } else {
-      router.push('/dashboard')
+      router.push('/')
       router.refresh()
     }
+  }
+
+  async function handleForgotPassword(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    const formData = new FormData(e.currentTarget)
+    const email = formData.get('email')
+
+    // Enviar um e-mail para o usuário com um link para redefinir a senha
+    // Você pode usar um serviço de e-mail como o SendGrid ou o Mailgun
+    // para enviar o e-mail
+    console.log('Enviar e-mail para', email)
   }
 
   return (
@@ -34,44 +46,80 @@ export default function Login() {
           <h2 className="text-center text-3xl font-bold">Login</h2>
         </div>
         
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <div className="text-red-600 text-center">{error}</div>
+        {forgotPassword ? (
+          <form className="mt-8 space-y-6" onSubmit={handleForgotPassword}>
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Email
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                required
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+            >
+              Enviar link para redefinir senha
+            </button>
+          </form>
+        ) : (
+          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+            {error && (
+              <div className="text-red-600 text-center">{error}</div>
+            )}
+            
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Email
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                required
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                Senha
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+            >
+              Entrar
+            </button>
+          </form>
+        )}
+
+        <div className="text-center mt-4">
+          {forgotPassword ? (
+            <button onClick={() => setForgotPassword(false)} className="text-blue-600 hover:underline">
+              Voltar para login
+            </button>
+          ) : (
+            <button onClick={() => setForgotPassword(true)} className="text-blue-600 hover:underline">
+              Esqueci a senha
+            </button>
           )}
-          
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              Email
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              Senha
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
-          >
-            Entrar
-          </button>
-        </form>
+        </div>
 
         <div className="text-center mt-4">
           <Link href="/register" className="text-blue-600 hover:underline">
@@ -81,4 +129,4 @@ export default function Login() {
       </div>
     </div>
   )
-} 
+}

@@ -6,11 +6,19 @@ interface OrderItem {
   productId: number
   quantity: number
   price: number
+  type: string
+}
+
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
+export async function OPTIONS() {
+  return NextResponse.json({}, { status: 200 })
 }
 
 export async function POST(request: Request) {
   const session = await getServerSession()
-  
+ 
   if (!session?.user?.email) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
   }
@@ -18,24 +26,35 @@ export async function POST(request: Request) {
   try {
     const { items, totalAmount } = await request.json()
 
-    // Verificar se algum produto já foi usado
     const products = await prisma.product.findMany({
       where: {
-        id: {
-          in: items.map((item: any) => item.productId)
-        }
-      },
-      // Não use select para obter todos os campos, incluindo isUsed
+        AND: [
+          {
+            type: {
+              in: items.map((item: OrderItem) => item.type)
+            }
+          },
+          {
+            isUsed: false
+          }
+        ]
+      }
     })
 
-    const usedProducts = products.filter((product: any) => product.isUsed === true)
-    if (usedProducts.length > 0) {
-      return NextResponse.json({
-        error: 'Um ou mais perfis já foram vendidos. Por favor, atualize seu carrinho.'
-      }, { status: 400 })
+    const availableCountByType = products.reduce((acc, product) => {
+      acc[product.type] = (acc[product.type] || 0) + 1
+      return acc
+    }, {} as Record<string, number>)
+
+    for (const item of items) {
+      const availableCount = availableCountByType[item.type] || 0
+      if (availableCount < item.quantity) {
+        return NextResponse.json({
+          error: `Quantidade insuficiente disponível para ${item.type}`
+        }, { status: 400 })
+      }
     }
 
-    // Buscar usuário
     const user = await prisma.user.findUnique({
       where: { email: session.user.email }
     })
@@ -44,21 +63,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Usuário não encontrado' }, { status: 404 })
     }
 
-    // Verificar saldo
     if (user.balance < totalAmount) {
       return NextResponse.json({ error: 'Saldo insuficiente' }, { status: 400 })
     }
 
-    // Criar pedido e atualizar produtos em uma transação
     const order = await prisma.$transaction(async (tx) => {
-      // Criar pedido
       const newOrder = await tx.order.create({
         data: {
           userId: user.id,
           totalAmount,
           status: 'COMPLETED',
           orderitem: {
-            create: items.map((item: any) => ({
+            create: items.map((item: OrderItem) => ({
               productId: item.productId,
               quantity: item.quantity,
               price: item.price
@@ -74,7 +90,6 @@ export async function POST(request: Request) {
         }
       })
 
-      // Atualizar saldo do usuário
       await tx.user.update({
         where: { id: user.id },
         data: {
@@ -84,12 +99,24 @@ export async function POST(request: Request) {
         }
       })
 
-      // Marcar produtos como usados
       for (const item of items) {
-        await tx.product.update({
-          where: { id: item.productId },
+        const productsToMark = await tx.product.findMany({
+          where: {
+            type: item.type,
+            isUsed: false
+          },
+          take: item.quantity
+        })
+
+        await tx.product.updateMany({
+          where: {
+            id: {
+              in: productsToMark.map(p => p.id)
+            }
+          },
           data: {
-            ...{ isUsed: true, userId: user.id } as any
+            isUsed: true,
+            userId: user.id
           }
         })
       }
@@ -106,39 +133,3 @@ export async function POST(request: Request) {
     )
   }
 }
-
-export async function GET() {
-  const session = await getServerSession()
-  
-  if (!session?.user?.email) {
-    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
-  }
-
-  try {
-    const orders = await prisma.order.findMany({
-      where: {
-        user: {
-          email: session.user.email
-        }
-      },
-      include: {
-        orderitem: {
-          include: {
-            product: true
-          }
-        }
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    })
-
-    return NextResponse.json(orders)
-  } catch (error) {
-    console.error('Erro ao buscar pedidos:', error)
-    return NextResponse.json(
-      { error: 'Erro ao carregar pedidos' },
-      { status: 500 }
-    )
-  }
-} 

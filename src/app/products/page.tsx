@@ -54,7 +54,7 @@ export default function Products() {
             <ProductCard
               key={product.id}
               product={{
-                id: product.id,
+                id: product.id.toString(),
                 name: product.name,
                 price: product.price,
                 description: product.description,
@@ -72,7 +72,7 @@ export default function Products() {
             <ProductCard
               key={product.id}
               product={{
-                id: product.id,
+                id: product.id.toString(),
                 name: product.name,
                 price: product.price,
                 description: product.description,

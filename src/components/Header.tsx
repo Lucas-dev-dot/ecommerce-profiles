@@ -8,6 +8,7 @@ import { ShoppingCart } from 'lucide-react'
 // import { ProductType } from '@prisma/client'
 import { CartItem } from '../types'
 import { Decimal } from 'decimal.js'
+import Image from 'next/image'
 
 export default function Header() {
   const pathname = usePathname()
@@ -52,12 +53,19 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-gray-900 text-white">
-      <nav className="container mx-auto px-4 py-4">
+    <header className="bg-gray-600   text-white">
+      <nav className="container mx-auto px-2 py-2">
         <div className="flex items-center justify-between">
-          <Link href="/" className="text-xl font-bold">
-            ProxyStore
-          </Link>
+        <Link href="/" className="text-xl font-bold flex items-center">
+          <Image 
+            src="/imagens/vision_logo.png" 
+            alt="Vision Contigencia"
+            width={150}
+            height={40}
+            priority
+            className="object-contain"
+          />
+        </Link>
           
           <div className="flex items-center gap-6">
             <Link 

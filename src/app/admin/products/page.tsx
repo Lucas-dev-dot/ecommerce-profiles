@@ -7,7 +7,10 @@ import type { Product as PrismaProduct } from '.prisma/client'
 import Link from 'next/link'
 
 interface Product extends PrismaProduct {
-  profileFile: string | null
+  profileFile: string | null;
+  stock: {
+    isUsed: boolean;
+  }[];
 }
 
 export default function AdminProducts() {
@@ -31,14 +34,14 @@ export default function AdminProducts() {
 
   async function loadProducts() {
     try {
-      const response = await fetch('/api/admin/products')
-      if (!response.ok) throw new Error('Erro ao carregar produtos')
-      const data = await response.json()
-      setProducts(data)
+      const response = await fetch('/api/admin/products');
+      if (!response.ok) throw new Error('Erro ao carregar produtos');
+      const data = await response.json();
+      setProducts(data);
     } catch (error) {
-      setError('Erro ao carregar produtos')
+      setError('Erro ao carregar produtos');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 

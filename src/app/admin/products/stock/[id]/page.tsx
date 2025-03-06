@@ -31,33 +31,33 @@ export default function ManageStock({ params }: { params: { id: string } }) {
 
   const handleFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     try {
-      const file = event.target.files?.[0];
-      if (!file) return;
+      const files = event.target.files;
+      if (!files) return;
   
-      const content = await file.text();
-      console.log('Content being sent:', content);
-  
-      const response = await fetch(`/api/admin/products/${params.id}/stock`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ content }),
-        credentials: 'include'
-      });
-  
-      // Log the response for debugging
-      console.log('Response status:', response.status);
-      console.log('Response ok:', response.ok);
-  
-      const data = await response.json();
+      let totalProfiles = 0;
       
-      if (response.ok) {
-        alert(`${data.items?.length || 0} perfis adicionados com sucesso!`);
-        router.refresh();
-      } else {
-        throw new Error(data.error || 'Falha ao adicionar perfis');
+      // Process each file
+      for (const file of Array.from(files)) {
+        const content = await file.text();
+        console.log(`Processing file: ${file.name}`);
+  
+        const response = await fetch(`/api/admin/products/${params.id}/stock`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ content }),
+        });
+  
+        const data = await response.json();
+        
+        if (response.ok) {
+          totalProfiles += data.items.length;
+        }
       }
+  
+      alert(`${totalProfiles} perfis adicionados com sucesso!`);
+      router.refresh();
   
     } catch (error) {
       console.error('Upload error:', error);
@@ -92,6 +92,7 @@ export default function ManageStock({ params }: { params: { id: string } }) {
               id="fileUpload"
               type="file"
               accept=".txt"
+              multiple
               onChange={handleFileUpload}
               className="block w-full text-sm text-gray-500
                 file:mr-4 file:py-2 file:px-4
