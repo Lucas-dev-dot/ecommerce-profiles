@@ -3,9 +3,9 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
 import { useState, useEffect } from 'react'
-import { useCart } from '@/contexts/CartContext'
+import { useCart, CartContextType } from '@/contexts/CartContext'
 import { ShoppingCart } from 'lucide-react'
-// import { ProductType } from '@prisma/client'
+import { product_type } from '@prisma/client'
 import { CartItem } from '../types'
 import { Decimal } from 'decimal.js'
 import Image from 'next/image'
@@ -14,7 +14,7 @@ export default function Header() {
   const pathname = usePathname()
   const { data: session } = useSession()
   const [balance, setBalance] = useState<number>(0)
-  const { items, setItems }: { items: CartItem[], setItems: React.Dispatch<React.SetStateAction<CartItem[]>> } = useCart()
+  const { items, setItems } = useCart() as CartContextType
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -43,14 +43,16 @@ export default function Header() {
     signOut({ callbackUrl: '/' })
   }
 
-  const addItem = (item: { id: number; name: string; price: number; }) => {
+  const addItem = (item: { id: number; name: string; price: number; type: product_type }) => {
     const newItem: CartItem = {
-      ...item,
+      id: item.id,
+      name: item.name,
       price: new Decimal(item.price),
       quantity: 1,
-    };
-    setItems((prevItems) => [...prevItems, newItem]);
-  };
+      type: item.type
+    }
+    setItems((prevItems: CartItem[]) => [...prevItems, newItem])
+  }
 
   return (
     <header className="bg-gray-600   text-white">
@@ -60,9 +62,9 @@ export default function Header() {
           <Image 
             src="/imagens/vision_logo.png" 
             alt="Vision Contigencia"
-            width={150}
-            height={40}
-            priority
+            width={100}
+            height={100}
+            priority={true}
             className="object-contain"
           />
         </Link>
@@ -158,4 +160,4 @@ export default function Header() {
       </nav>
     </header>
   )
-} 
+}

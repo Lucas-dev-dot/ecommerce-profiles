@@ -16,30 +16,27 @@ export default function AddBalance() {
     return null
   }
 
-  const handleAddBalance = async () => {
+  async function handleAddBalance() {
     if (loading || !amount || Number(amount) <= 0) return
     
     setLoading(true)
     setError('')
     
     try {
-      const response = await fetch('/api/balance/add', {
+      const response = await fetch('/api/payments', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ amount: Number(amount) }),
       })
-
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || 'Erro ao adicionar saldo')
+  
+      const data = await response.json()
+      if (data.init_point) {
+        window.location.href = data.init_point
+      } else {
+        throw new Error('Erro ao gerar pagamento')
       }
-
-      // Redirecionar para a página de produtos após adicionar saldo
-      router.push('/products')
-      // Forçar atualização da página para mostrar novo saldo
-      router.refresh()
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Erro ao adicionar saldo')
     } finally {

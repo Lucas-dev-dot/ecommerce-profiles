@@ -1,20 +1,20 @@
 'use client'
 
 import React, { createContext, useContext, useState, useEffect } from 'react'
-import type { Product } from '@prisma/client';
-import { Decimal } from 'decimal.js';
-import type { product_type } from '@prisma/client/edge';
+import type { Product, product_type } from '@prisma/client'
+import { Decimal } from 'decimal.js'
 
 interface CartItem {
-  id: number;
-  name: string;
-  price: Decimal;
-  quantity: number;
+  id: number
+  name: string
+  price: Decimal
+  type: product_type
+  quantity: number
 }
 
-interface CartContextType {
-  items: CartItem[];
-  setItems: React.Dispatch<React.SetStateAction<CartItem[]>>;
+export interface CartContextType {
+  items: CartItem[]
+  setItems: React.Dispatch<React.SetStateAction<CartItem[]>>
   addItem: (product: Product) => void
   removeItem: (productId: number) => void
   clearCart: () => void
@@ -39,27 +39,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('cart', JSON.stringify(items))
   }, [items])
 
-  const addItem = (product: { 
-    name: string; 
-    id: number; 
-    description: string | null; 
-    price: Decimal; 
-    type: product_type;
-    createdAt: Date; 
-    updatedAt: Date; 
-    imageUrl: string | null; 
-    profileFile: string | null; 
-    isUsed: boolean; 
-    userId: number | null; 
-  }) => {
+  const addItem = (product: Product) => {
     const productToAdd: CartItem = {
-      ...product,
-      quantity: 1,
-    };
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      type: product.type,
+      quantity: 1
+    }
 
     // Verificar se o produto já está no carrinho
     if (!items.find(item => item.id === productToAdd.id)) {
-      setItems([...items, productToAdd]);
+      setItems([...items, productToAdd])
     }
   }
 
@@ -89,4 +80,4 @@ export const useCart = () => {
     throw new Error('useCart must be used within a CartProvider')
   }
   return context
-} 
+}

@@ -1,6 +1,6 @@
 import { Decimal } from 'decimal.js';
 
-export type ProductType = 'PROFILE' | 'PROXY';
+export type product_type = 'PROFILE' | 'PROXY';
 
 export interface CartItem {
   id: number;
@@ -8,5 +8,5 @@ export interface CartItem {
   price: Decimal;
   quantity: number;
   description?: string | null;
-  type?: ProductType;
+  type: product_type;
 }

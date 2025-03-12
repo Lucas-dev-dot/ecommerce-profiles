@@ -1,4 +1,4 @@
-import  prisma  from '@/lib/prisma'
+import prisma from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { NextResponse } from 'next/server'
 
@@ -7,39 +7,64 @@ export async function GET(
   { params }: { params: { orderItemId: string } }
 ) {
   const session = await getServerSession()
-  
+ 
   if (!session?.user?.email) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+  }
+
+  const orderItemId = Number(params.orderItemId)
+  if (isNaN(orderItemId)) {
+    return NextResponse.json({ error: 'ID inválido' }, { status: 400 })
   }
 
   try {
     const orderItem = await prisma.orderItem.findFirst({
       where: {
-        id: parseInt(params.orderItemId),
+        id: orderItemId,
         order: {
           user: {
             email: session.user.email
           }
         }
       },
-      include: {
-        product: true
+      select: {
+        id: true,
+        productId: true,
+        order: {
+          select: {
+            user: true
+          }
+        },
+        product: {
+          select: {
+            stock: {
+              where: {
+                isUsed: true
+              },
+              take: 1,
+              select: {
+                content: true
+              }
+            }
+          }
+        }
       }
     })
+   
+    console.log('Order Item:', orderItem)
 
     if (!orderItem) {
       return NextResponse.json({ error: 'Item não encontrado' }, { status: 404 })
     }
 
-    if (!orderItem.product.profileFile) {
+    if (!orderItem?.product?.stock?.[0]?.content) {
       return NextResponse.json({ error: 'Arquivo não disponível' }, { status: 404 })
     }
 
-    // Retorna o conteúdo do arquivo
-    return new NextResponse(orderItem.product.profileFile, {
+    return new NextResponse(orderItem.product.stock[0].content, {
       headers: {
-        'Content-Type': 'text/plain',
-        'Content-Disposition': `attachment; filename="profile-${orderItem.product.id}.txt"`
+        'Content-Type': 'application/octet-stream',
+        'Content-Disposition': `attachment; filename="profile-${orderItem.productId}.txt"`
       }
     })
   } catch (error) {
@@ -49,4 +74,4 @@ export async function GET(
       { status: 500 }
     )
   }
-} 
+}

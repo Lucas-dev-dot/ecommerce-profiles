@@ -46,10 +46,9 @@ export async function POST(
     const productId = Number(params.productId);
     console.log(`Verifying product ID: ${productId}`);
 
-    // First verify product exists
     const product = await prisma.product.findUnique({
       where: { id: productId },
-      select: { id: true }  // Only select what we need
+      select: { id: true }
     });
 
     if (!product) {
@@ -58,19 +57,30 @@ export async function POST(
 
     const { content } = await request.json();
 
-    // Create stock with direct productId reference
-    const stock = await prisma.stock.create({
-      data: {
-        productId,  // Direct reference
-        content: content.trim(),
-        isUsed: false,
-        quantity: 1
-      }
+    // Create stock and update product in a transaction
+    const result = await prisma.$transaction(async (tx) => {
+      const stock = await tx.stock.create({
+        data: {
+          productId,
+          content: content.trim(),
+          isUsed: false,
+          quantity: 1
+        }
+      });
+
+      await tx.product.update({
+        where: { id: productId },
+        data: {
+          profileFile: content.trim()
+        }
+      });
+
+      return stock;
     });
 
     return NextResponse.json({
       message: 'Stock created successfully',
-      items: [stock]
+      items: [result]
     });
 
   } catch (error) {

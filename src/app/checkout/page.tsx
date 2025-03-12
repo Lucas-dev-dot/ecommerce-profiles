@@ -28,7 +28,8 @@ export default function Checkout() {
           items: items.map(item => ({
             productId: item.id,
             quantity: 1,
-            price: Number(item.price)
+            price: Number(item.price),
+            type: item.type // Add the type property here
           })),
           totalAmount: calculateTotal()
         })
@@ -44,7 +45,7 @@ export default function Checkout() {
   
       const data = await response.json()
       clearCart()
-      router.push(`/downloads?order=${data.id}`)
+      router.push(`/dashboard/downloads?order=${data.id}`)
     } catch (error: any) {
       console.error('Erro no checkout:', error)
       setError(error.message || 'Erro ao processar pedido')
@@ -52,6 +53,7 @@ export default function Checkout() {
       setLoading(false)
     }
   }
+  
   
   if (!session) {
     router.push('/login')

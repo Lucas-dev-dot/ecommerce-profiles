@@ -74,8 +74,8 @@ export default function Downloads() {
               <h3 className="font-semibold">{item.product.name}</h3>
               {item.product.type === 'PROFILE' && (
                 <button
-                  onClick={() => window.open(item.downloadUrl || '#', '_blank')}
-                  className="mt-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                onClick={() => window.open(`/api/downloads/${item.id}`, '_blank')}
+                className="mt-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
                 >
                   Download do Perfil
                 </button>
