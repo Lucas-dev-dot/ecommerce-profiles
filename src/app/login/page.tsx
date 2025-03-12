@@ -32,11 +32,16 @@ export default function Login() {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
     const email = formData.get('email')
-
-    // Enviar um e-mail para o usuário com um link para redefinir a senha
-    // Você pode usar um serviço de e-mail como o SendGrid ou o Mailgun
-    // para enviar o e-mail
-    console.log('Enviar e-mail para', email)
+  
+    const res = await fetch('/api/reset-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    })
+  
+    if (res.ok) {
+      alert('Check your email for reset instructions')
+    }
   }
 
   return (

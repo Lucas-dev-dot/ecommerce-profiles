@@ -25,6 +25,8 @@ model User {
   product_userproducts Product[] @relation("UserProducts")
   products             Product[] @relation("UserProducts2")
   stock                Stock[]   @relation("UserStock")
+  resetToken           String?
+  resetTokenExpiry     DateTime?
 }
 
 model Product {
