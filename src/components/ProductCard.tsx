@@ -20,18 +20,6 @@ interface ProductCardProps {
   }
 }
 
-interface ProductCardProps {
-  product: {
-    id: string
-    name: string
-    description: string
-    price: number
-    imageUrl?: string
-    type: string
-    profileFile?: string | null
-    createdAt?: Date
-  }
-}
 export function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCart()
   const { data: session } = useSession()
@@ -43,12 +31,13 @@ export function ProductCard({ product }: ProductCardProps) {
       return
     }
 
-    if (product.type === 'PROXY') {
-      // Redirecionar para WhatsApp
-      const message = `Olá, gostaria de informações sobre o proxy: ${product.name}`
-      window.open(`https://wa.me/5511999999999?text=${encodeURIComponent(message)}`, '_blank')
-      return
-    }
+    // Remova esta condição para tratar proxies como perfis
+    // if (product.type === 'PROXY') {
+    //   // Redirecionar para WhatsApp
+    //   const message = `Olá, gostaria de informações sobre o proxy: ${product.name}`
+    //   window.open(`https://wa.me/5511999999999?text=${encodeURIComponent(message)}`, '_blank')
+    //   return
+    // }
 
     setIsAdding(true)
     try {
@@ -83,7 +72,7 @@ export function ProductCard({ product }: ProductCardProps) {
           src={`/imagens/${product.imageUrl}`}
           alt={product.name}
           fill
-          sizes="(max-width: 680px) 80vw"
+          sizes="(max-width: 400px) 50vw"
           className="object-cover"
         />
       </div>
@@ -99,14 +88,16 @@ export function ProductCard({ product }: ProductCardProps) {
           className={`w-full mt-4 py-2 rounded transition-colors ${
             isAdding
               ? 'bg-gray-400 cursor-not-allowed'
-              : 'bg-blue-600 hover:bg-blue-700 text-white'
+              : 'bg-red-600 hover:bg-red-700 text-white'
           }`}
         >
           {isAdding
             ? 'Adicionando...'
-            : product.type === 'PROXY'
-              ? 'Solicitar Informações'
-              : 'Adicionar ao Carrinho'
+            : 'Adicionar ao Carrinho'
+            // Remova esta condição para mostrar o mesmo texto para todos os produtos
+            // : product.type === 'PROXY'
+            //   ? 'Solicitar Informações'
+            //   : 'Adicionar ao Carrinho'
           }
         </button>
       </div>

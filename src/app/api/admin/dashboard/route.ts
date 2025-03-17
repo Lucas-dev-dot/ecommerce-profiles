@@ -5,48 +5,40 @@ import { NextResponse } from 'next/server'
 export async function GET() {
   const session = await getServerSession()
   
-  if (!session?.user?.isAdmin) {
+  if (!session?.user?.email) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
   }
 
   try {
-    // Buscar todas as estatísticas em paralelo
-    const [users, orders, profiles] = await Promise.all([
-      // Total de usuários (excluindo admins)
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { isAdmin: true }
+    })
+
+    if (!user?.isAdmin) {
+      return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
+    }
+
+    const [totalUsers, totalOrders, totalRevenue, totalProfiles] = await Promise.all([
       prisma.user.count({
-        where: {
-          isAdmin: false
-        }
+        where: { isAdmin: false }
       }),
-      
-      // Total de pedidos e receita
-      prisma.order.findMany({
-        select: {
+      prisma.order.count(),
+      prisma.order.aggregate({
+        _sum: {
           totalAmount: true
         }
       }),
-      
-      // Total de perfis ativos
       prisma.product.count({
-        where: {
-          type: 'PROFILE',
-          profileFile: {
-            not: null
-          }
-        }
+        where: { type: 'PROFILE' }
       })
     ])
 
-    // Calcular receita total
-    const totalRevenue = orders.reduce((sum: number, order: { totalAmount: any }) => 
-      sum + Number(order.totalAmount), 0
-    )
-
     return NextResponse.json({
-      totalUsers: users,
-      totalOrders: orders.length,
-      totalRevenue: totalRevenue,
-      totalProfiles: profiles
+      totalUsers,
+      totalOrders,
+      totalRevenue: totalRevenue._sum.totalAmount || 0,
+      totalProfiles
     })
   } catch (error) {
     console.error('Erro ao carregar estatísticas:', error)
@@ -55,4 +47,4 @@ export async function GET() {
       { status: 500 }
     )
   }
-} 
+}

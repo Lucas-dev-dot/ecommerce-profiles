@@ -72,12 +72,12 @@ export default function AdminDashboard() {
           <p className="text-3xl font-bold mt-2">{stats?.totalOrders || 0}</p>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
+        {/* <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-lg font-semibold text-gray-600">Receita Total</h3>
           <p className="text-3xl font-bold mt-2">
             R$ {(stats?.totalRevenue || 0).toFixed(2)}
           </p>
-        </div>
+        </div> */}
 
         <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-lg font-semibold text-gray-600">Perfis Ativos</h3>

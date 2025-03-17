@@ -52,7 +52,9 @@ export default function EditProduct({ params }: { params: { id: string } }) {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Editar Produto</h1>
+      <h1 className="text-2xl font-bold mb-4">
+        Editar {product.type === 'PROFILE' ? 'Perfil' : 'Proxy'}
+      </h1>
       
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -70,7 +72,7 @@ export default function EditProduct({ params }: { params: { id: string } }) {
             className="w-full p-2 border rounded"
             required
             aria-label="Nome do produto"
-            placeholder="Digite o nome do produto"
+            placeholder={`Digite o nome do ${product.type === 'PROFILE' ? 'perfil' : 'proxy'}`}
           />
         </div>
 
@@ -83,7 +85,7 @@ export default function EditProduct({ params }: { params: { id: string } }) {
             rows={4}
             required
             aria-label="Descrição do produto"
-            placeholder="Digite a descrição do produto"
+            placeholder={`Digite a descrição do ${product.type === 'PROFILE' ? 'perfil' : 'proxy'}`}
           />
         </div>
 
@@ -98,8 +100,23 @@ export default function EditProduct({ params }: { params: { id: string } }) {
             step="0.01"
             required
             aria-label="Preço do produto"
-            placeholder="Digite o preço do produto"
+            placeholder={`Digite o preço do ${product.type === 'PROFILE' ? 'perfil' : 'proxy'}`}
           />
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-2">Tipo</label>
+          <select
+            value={product.type}
+            onChange={(e) => setProduct({ ...product, type: e.target.value })}
+            className="w-full p-2 border rounded"
+            required
+            aria-label="Tipo do produto"
+            title="Selecione o tipo do produto"
+          >
+            <option value="PROFILE">Perfil</option>
+            <option value="PROXY">Proxy</option>
+          </select>
         </div>
 
         <div className="flex gap-2">
@@ -120,4 +137,5 @@ export default function EditProduct({ params }: { params: { id: string } }) {
       </form>
     </div>
   )
-} 
+
+}

@@ -26,7 +26,7 @@ export default function Downloads() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const orderId = searchParams.get('order')
-  
+ 
   const [order, setOrder] = useState<Order | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -62,7 +62,7 @@ export default function Downloads() {
   return (
     <div className="max-w-4xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">Downloads Disponíveis</h1>
-      
+     
       <div className="bg-white rounded-lg shadow-md p-6">
         <h2 className="text-xl font-semibold mb-4">
           Pedido #{order.id} - {new Date(order.createdAt).toLocaleDateString()}
@@ -72,12 +72,17 @@ export default function Downloads() {
           {order.orderItems.map(item => (
             <div key={item.id} className="border p-4 rounded">
               <h3 className="font-semibold">{item.product.name}</h3>
-              {item.product.type === 'PROFILE' && (
+              <p className="text-sm text-gray-500 mb-2">
+                Tipo: {item.product.type === 'PROFILE' ? 'Perfil' : 'Proxy'}
+              </p>
+              
+              {/* Modificado para incluir tanto PROFILE quanto PROXY */}
+              {(item.product.type === 'PROFILE' || item.product.type === 'PROXY') && (
                 <button
-                onClick={() => window.open(`/api/downloads/${item.id}`, '_blank')}
-                className="mt-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                  onClick={() => window.open(`/api/downloads/${item.id}`, '_blank')}
+                  className="mt-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
                 >
-                  Download do Perfil
+                  Download do {item.product.type === 'PROFILE' ? 'Perfil' : 'Proxy'}
                 </button>
               )}
             </div>
@@ -95,4 +100,4 @@ export default function Downloads() {
       </div>
     </div>
   )
-} 
+}

@@ -5,26 +5,27 @@ import { NextResponse } from 'next/server'
 export async function GET() {
   const session = await getServerSession()
   
-  if (!session?.user?.isAdmin) {
+  if (!session?.user?.email) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
   }
 
   try {
     const users = await prisma.user.findMany({
-      where: {
-        isAdmin: false // Excluir admins da lista
-      },
-      include: {
-        order: {
-          include: {
-            orderitem: {
-              include: {
-                product: true
-              }
-            }
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        balance: true,
+        createdAt: true,
+        isAdmin: true,
+        _count: {
+          select: {
+            orders: true
           }
-        },
-        product_userproducts: true // Ensure this matches the relation name in your schema
+        }
+      },
+      where: {
+        isAdmin: false
       },
       orderBy: {
         createdAt: 'desc'
@@ -39,4 +40,4 @@ export async function GET() {
       { status: 500 }
     )
   }
-} 
+}

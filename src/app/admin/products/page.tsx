@@ -19,7 +19,7 @@ export default function AdminProducts() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
-  const [profileContent, setProfileContent] = useState('')
+  const [fileContent, setFileContent] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
@@ -54,14 +54,14 @@ export default function AdminProducts() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ profileContent }),
+        body: JSON.stringify({ profileContent: fileContent }),
       })
 
       if (!response.ok) throw new Error('Erro ao atualizar perfil')
 
       setSuccess('Perfil atualizado com sucesso!')
       loadProducts()
-      setProfileContent('')
+      setFileContent('')
       setSelectedProduct(null)
     } catch (error) {
       setError('Erro ao atualizar perfil')
@@ -97,45 +97,64 @@ export default function AdminProducts() {
                 className="border p-4 rounded hover:bg-gray-50 cursor-pointer"
                 onClick={() => {
                   setSelectedProduct(product)
-                  setProfileContent(product.profileFile || '')
+                  setFileContent(product.profileFile || '')
                 }}
               >
                 <p><strong>Nome:</strong> {product.name}</p>
                 <p><strong>Tipo:</strong> {product.type}</p>
                 <p><strong>Arquivo:</strong> {product.profileFile ? 'Disponível' : 'Não configurado'}</p>
+                
+                {/* Adicione os links diretamente em cada item da lista */}
+                <div className="mt-2 flex space-x-2">
+                  <Link 
+                    href={`/admin/products/edit/${product.id}`}
+                    className="px-3 py-1 text-sm bg-yellow-500 text-white rounded hover:bg-yellow-600"
+                    onClick={(e) => e.stopPropagation()} // Evita que o clique no link selecione o produto
+                  >
+                    Editar
+                  </Link>
+                  <Link 
+                    href={`/admin/products/stock/${product.id}`}
+                    className="px-3 py-1 text-sm bg-green-500 text-white rounded hover:bg-green-600"
+                    onClick={(e) => e.stopPropagation()} // Evita que o clique no link selecione o produto
+                  >
+                    Gerenciar Estoque
+                  </Link>
+                </div>
               </div>
             ))}
           </div>
         </div>
 
         {/* Editor de Perfil */}
-        {selectedProduct && selectedProduct.type === 'PROFILE' && (
+        {selectedProduct && (selectedProduct.type === 'PROFILE' || selectedProduct.type === 'PROXY') && (
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-xl font-semibold mb-4">
-              Editar Perfil: {selectedProduct.name}
+              Editar {selectedProduct.type === 'PROFILE' ? 'Perfil' : 'Proxy'}: {selectedProduct.name}
             </h2>
             <div className="space-y-4">
               <textarea
-                value={profileContent}
-                onChange={(e) => setProfileContent(e.target.value)}
+                value={fileContent}
+                onChange={(e) => setFileContent(e.target.value)}
                 className="w-full h-64 border rounded p-2 font-mono"
-                placeholder="Cole aqui o conteúdo do perfil..."
+                placeholder={`Cole aqui o conteúdo do ${selectedProduct.type === 'PROFILE' ? 'perfil' : 'proxy'}...`}
               />
               <button
                 onClick={handleUpdateProfile}
                 className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
               >
-                Salvar Perfil
+                Salvar {selectedProduct.type === 'PROFILE' ? 'Perfil' : 'Proxy'}
               </button>
             </div>
           </div>
         )}
       </div>
 
-      <div className="mt-6">
+      {/* Remova esta seção, pois agora os links estão em cada item da lista */}
+      {/* <div className="mt-6">
         <Link href={`/admin/products/edit/${selectedProduct?.id}`}>Editar</Link>
         <Link href={`/admin/products/stock/${selectedProduct?.id}`}>Gerenciar Estoque</Link>
-      </div>
+      </div> */}
     </div>
   )
-} 
+}

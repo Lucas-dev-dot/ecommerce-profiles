@@ -21,9 +21,15 @@ interface Product {
 
 interface ProductListProps {
   products: Product[]
+  showProxies?: boolean // Adicione esta prop para controlar se mostra proxies
+  showProfiles?: boolean // Adicione esta prop para controlar se mostra perfis
 }
 
-export default function ProductList({ products }: ProductListProps) {
+export default function ProductList({ 
+  products, 
+  showProxies = true, 
+  showProfiles = true 
+}: ProductListProps) {
   const [isClient, setIsClient] = useState(false)
   
   console.log('=== ProductList Render ===')
@@ -53,44 +59,48 @@ export default function ProductList({ products }: ProductListProps) {
   return (
     <div>
       {/* Seção de Perfis */}
-      <section className="mb-12">
-        <h2 className="text-2xl font-semibold mb-4">Perfis ({profiles.length})</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {profiles.map((product) => (
-            <ProductCard 
-              key={`profile-${product.id}`} 
-              product={{
-                ...product,
-                id: product.id.toString(),
-                price: Number(product.price)
-              }}
-            />
-          ))}
-        </div>
-        {profiles.length === 0 && (
-          <p className="text-gray-500">Nenhum perfil cadastrado.</p>
-        )}
-      </section>
+      {showProfiles && profiles.length > 0 && (
+        <section className="mb-12">
+          <h2 className="text-2xl font-semibold mb-4">Perfis</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {profiles.map((product) => (
+              <ProductCard 
+                key={`profile-${product.id}`} 
+                product={{
+                  ...product,
+                  id: product.id.toString(),
+                  price: Number(product.price)
+                }}
+              />
+            ))}
+          </div>
+          {profiles.length === 0 && (
+            <p className="text-gray-500">Nenhum perfil cadastrado.</p>
+          )}
+        </section>
+      )}
       
       {/* Seção de Proxies */}
-      <section>
-        <h2 className="text-2xl font-semibold mb-4">Proxies ({proxies.length})</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {proxies.map((product) => (
-            <ProductCard 
-              key={`proxy-${product.id}`} 
-              product={{
-                ...product,
-                id: product.id.toString(),
-                price: Number(product.price)
-              }}
-            />
-          ))}
-        </div>
-        {proxies.length === 0 && (
-          <p className="text-gray-500">Nenhum proxy cadastrado.</p>
-        )}
-      </section>
+      {showProxies && proxies.length > 0 && (
+        <section>
+          <h2 className="text-2xl font-semibold mb-4">Proxies</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {proxies.map((product) => (
+              <ProductCard 
+                key={`proxy-${product.id}`} 
+                product={{
+                  ...product,
+                  id: product.id.toString(),
+                  price: Number(product.price)
+                }}
+              />
+            ))}
+          </div>
+          {proxies.length === 0 && (
+            <p className="text-gray-500">Nenhum proxy cadastrado.</p>
+          )}
+        </section>
+      )}
     </div>
   )
-} 
+}

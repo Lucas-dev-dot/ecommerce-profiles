@@ -55,27 +55,27 @@ export default function Header() {
   }
 
   return (
-    <header className="bg-gray-600   text-white">
+    <header className="bg-zinc-800   text-white">
       <nav className="container mx-auto px-2 py-2">
         <div className="flex items-center justify-between">
         <Link href="/" className="text-xl font-bold flex items-center">
           <Image 
             src="/imagens/vision_logo.png" 
             alt="Vision Contigencia"
-            width={100}
-            height={100}
+            width={150}
+            height={150}
             priority={true}
             className="object-contain"
           />
         </Link>
           
           <div className="flex items-center gap-6">
-            <Link 
+            {/* <Link 
               href="/products"
               className={`hover:text-gray-300 ${pathname === '/products' ? 'text-blue-400' : ''}`}
             >
               Produtos
-            </Link>
+            </Link> */}
             
             {session ? (
               <>
@@ -128,7 +128,7 @@ export default function Header() {
                 </Link>
                 <Link
                   href="/add-balance"
-                  className="bg-blue-600 px-4 py-2 rounded-md hover:bg-blue-700"
+                  className="bg-green-600 px-4 py-2 rounded-md hover:bg-green-700"
                 >
                   Adicionar Saldo
                 </Link>

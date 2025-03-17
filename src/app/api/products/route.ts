@@ -1,44 +1,44 @@
 import prisma from '@/lib/prisma'
 import { NextResponse } from 'next/server'
-import { Product } from '@prisma/client'
-import Decimal from 'decimal.js';
 
-export async function GET() {
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url)
+  const type = searchParams.get('type') as 'PROFILE' | 'PROXY' | null // Pode ser 'PROFILE', 'PROXY' ou null (para todos)
+  
   try {
-    console.log('Iniciando busca de produtos...')
+    const whereClause = type ? { type } : {}
     
     const products = await prisma.product.findMany({
+      where: whereClause,
       select: {
         id: true,
         name: true,
         price: true,
         description: true,
         type: true,
-      }
+        imageUrl: true,
+        _count: {
+          select: {
+            stock: {
+              where: {
+                isUsed: false
+              }
+            }
+          }
+        }
+      },
+      distinct: ['id'] // Ensures no duplicate products
     })
 
-    console.log('Produtos encontrados:', products);
+    const formattedProducts = products.map(product => ({
+      ...product,
+      price: Number(product.price),
+      stock: product._count.stock
+    }))
 
-    // Ensure `price` is a number
-    const productsWithCount = await Promise.all(products.map(async (product) => {
-      const stockCount = await prisma.stock.count({
-        where: {
-          productId: product.id,
-          isUsed: false
-        }
-      });
-
-      return {
-        ...product,
-        price: Number(product.price),  // Convert Decimal to number
-        stockCount,
-      };
-    }));
-
-    return NextResponse.json(productsWithCount);
+    return NextResponse.json(formattedProducts)
   } catch (error) {
-    const typedError = error as Error; // Type assertion
-    console.error('Erro na API:', typedError.message);
+    console.error('Erro na API:', error)
     return NextResponse.json(
       { error: 'Erro ao carregar produtos' },
       { status: 500 }

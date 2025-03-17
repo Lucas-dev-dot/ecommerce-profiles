@@ -3,10 +3,19 @@ import prisma from '@/lib/prisma';
 
 export async function GET() {
   try {
+    // Buscar todos os produtos, não apenas os do tipo "PROFILE"
     const products = await prisma.product.findMany({
-      where: {
-        type: 'PROFILE', // Filtra apenas os produtos do tipo "PROFILE"
-      },
+      include: {
+        _count: {
+          select: {
+            stock: {
+              where: {
+                isUsed: false
+              }
+            }
+          }
+        }
+      }
     });
     return NextResponse.json(products);
   } catch (error) {

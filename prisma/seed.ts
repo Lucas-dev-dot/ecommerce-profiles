@@ -48,7 +48,7 @@ async function main() {
     ],
   });
 
-  // Criar proxies
+  // Criar proxies - Agora usando o mesmo formato que os perfis
   await prisma.product.createMany({
     data: [
       { name: 'Proxy Básico', price: 5.0, description: 'Proxy com velocidade básica', type: 'PROXY', userId: normalUser.id, imageUrl: 'proxy_básico.png' },

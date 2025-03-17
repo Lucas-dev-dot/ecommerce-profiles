@@ -7,7 +7,7 @@ export async function GET(
   { params }: { params: { orderItemId: string } }
 ) {
   const session = await getServerSession()
- 
+
   if (!session?.user?.email) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
   }
@@ -37,6 +37,8 @@ export async function GET(
         },
         product: {
           select: {
+            name: true,
+            type: true,
             stock: {
               where: {
                 isUsed: true
@@ -61,10 +63,16 @@ export async function GET(
       return NextResponse.json({ error: 'Arquivo não disponível' }, { status: 404 })
     }
 
+    // Determinar o tipo de arquivo com base no tipo do produto
+    const fileType = orderItem.product.type === 'PROFILE' ? 'profile' : 'proxy';
+    
+    // Criar um nome de arquivo mais amigável baseado no nome do produto
+    const fileName = `${fileType}-${orderItem.product.name.toLowerCase().replace(/\s+/g, '-')}-${orderItem.productId}.txt`;
+
     return new NextResponse(orderItem.product.stock[0].content, {
       headers: {
         'Content-Type': 'application/octet-stream',
-        'Content-Disposition': `attachment; filename="profile-${orderItem.productId}.txt"`
+        'Content-Disposition': `attachment; filename="${fileName}"`
       }
     })
   } catch (error) {

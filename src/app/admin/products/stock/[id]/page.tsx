@@ -1,4 +1,5 @@
 'use client'
+
 import { useState, useEffect, ChangeEvent } from 'react'
 import { useRouter } from 'next/navigation'
 
@@ -33,14 +34,14 @@ export default function ManageStock({ params }: { params: { id: string } }) {
     try {
       const files = event.target.files;
       if (!files) return;
-  
-      let totalProfiles = 0;
+
+      let totalItems = 0;
       
       // Process each file
       for (const file of Array.from(files)) {
         const content = await file.text();
         console.log(`Processing file: ${file.name}`);
-  
+
         const response = await fetch(`/api/admin/products/${params.id}/stock`, {
           method: 'POST',
           headers: {
@@ -48,20 +49,23 @@ export default function ManageStock({ params }: { params: { id: string } }) {
           },
           body: JSON.stringify({ content }),
         });
-  
+
         const data = await response.json();
         
         if (response.ok) {
-          totalProfiles += data.items.length;
+          totalItems += data.items.length;
         }
       }
-  
-      alert(`${totalProfiles} perfis adicionados com sucesso!`);
-      router.refresh();
-  
+
+      // Mensagem dinâmica baseada no tipo do produto
+      const itemType = product.type === 'PROFILE' ? 'perfis' : 'proxies';
+      alert(`${totalItems} ${itemType} adicionados com sucesso!`);
+      
+      // Recarregar os dados
+      loadProduct();
     } catch (error) {
       console.error('Upload error:', error);
-      alert('Erro ao adicionar perfis. Verifique o console para mais detalhes.');
+      alert('Erro ao adicionar itens. Verifique o console para mais detalhes.');
     }
   };
 
@@ -69,14 +73,21 @@ export default function ManageStock({ params }: { params: { id: string } }) {
   if (error) return <div className="p-4 text-red-600">{error}</div>
   if (!product) return <div className="p-4">Produto não encontrado</div>
 
+  // Texto dinâmico baseado no tipo do produto
+  const itemType = product.type === 'PROFILE' ? 'perfil' : 'proxy';
+  const itemTypePlural = product.type === 'PROFILE' ? 'perfis' : 'proxies';
+
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Gerenciar Estoque</h1>
+      <h1 className="text-2xl font-bold mb-4">
+        Gerenciar Estoque de {itemTypePlural}
+      </h1>
       
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="mb-4">
           <h2 className="text-xl font-semibold">{product.name}</h2>
           <p className="text-gray-600">{product.description}</p>
+          <p className="text-sm text-gray-500">Tipo: {product.type}</p>
         </div>
 
         <div className="mb-6">
@@ -100,7 +111,7 @@ export default function ManageStock({ params }: { params: { id: string } }) {
                 file:text-sm file:font-semibold
                 file:bg-violet-50 file:text-violet-700
                 hover:file:bg-violet-100"
-              aria-label="Selecione um arquivo para upload"
+              aria-label={`Selecione um arquivo de ${itemType} para upload`}
             />
           </div>
 
@@ -116,5 +127,4 @@ export default function ManageStock({ params }: { params: { id: string } }) {
       </div>
     </div>
   )
-
 }
