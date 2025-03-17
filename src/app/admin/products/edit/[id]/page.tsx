@@ -137,5 +137,4 @@ export default function EditProduct({ params }: { params: { id: string } }) {
       </form>
     </div>
   )
-
 }

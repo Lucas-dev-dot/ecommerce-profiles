@@ -12,21 +12,35 @@ enum product_type {
   PROXY
 }
 
+enum transaction_status {
+  PENDING
+  COMPLETED
+  FAILED
+  EXPIRED
+}
+
+enum transaction_type {
+  DEPOSIT
+  WITHDRAWAL
+  PURCHASE
+}
+
 model User {
-  id                   Int       @id @default(autoincrement())
+  id                   Int           @id @default(autoincrement())
   name                 String
-  email                String    @unique(map: "User_email_key")
+  email                String        @unique(map: "User_email_key")
   password             String
-  balance              Decimal   @default(0.00) @db.Decimal(10, 2)
-  isAdmin              Boolean   @default(false)
-  createdAt            DateTime  @default(now())
-  updatedAt            DateTime  @updatedAt
-  orders               Order[]   @relation("UserOrders")
-  product_userproducts Product[] @relation("UserProducts")
-  products             Product[] @relation("UserProducts2")
-  stock                Stock[]   @relation("UserStock")
+  balance              Decimal       @default(0.00) @db.Decimal(10, 2)
+  isAdmin              Boolean       @default(false)
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  orders               Order[]       @relation("UserOrders")
+  product_userproducts Product[]     @relation("UserProducts")
+  products             Product[]     @relation("UserProducts2")
+  stock                Stock[]       @relation("UserStock")
   resetToken           String?
   resetTokenExpiry     DateTime?
+  transactions         Transaction[] @relation("UserTransactions")
 }
 
 model Product {
@@ -51,8 +65,8 @@ model Product {
 }
 
 model Order {
-  id         Int          @id @default(autoincrement())
-  userId     Int
+  id          Int          @id @default(autoincrement())
+  userId      Int
   totalAmount Decimal      @db.Decimal(10, 2)
   status      order_status
   createdAt   DateTime     @default(now())
@@ -100,6 +114,23 @@ model Stock {
 
   @@index([productId], map: "Stock_productId_fkey")
   @@index([userId])   // Add index for userId
+}
+
+model Transaction {
+  id            Int                @id @default(autoincrement())
+  userId        Int
+  amount        Decimal            @db.Decimal(10, 2)
+  status        transaction_status
+  type          transaction_type
+  transactionId String             @unique
+  pixCode       String?            @db.Text
+  expiresAt     DateTime?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  user          User               @relation("UserTransactions", fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([transactionId])
 }
 
 enum order_status {

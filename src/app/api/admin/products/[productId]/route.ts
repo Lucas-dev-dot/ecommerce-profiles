@@ -33,3 +33,33 @@ export async function GET(
     return NextResponse.json({ error: 'Erro ao buscar produto' }, { status: 500 });
   }
 }
+
+export async function PUT(
+  request: Request,
+  { params }: { params: { productId: string } }
+) {
+  const { productId } = params;
+
+  try {
+    // Obter dados do corpo da requisição
+    const data = await request.json();
+    
+    console.log(`Atualizando produto com ID: ${productId}`, data);
+    
+    // Atualizar o produto
+    const updatedProduct = await prisma.product.update({
+      where: { id: parseInt(productId) },
+      data: {
+        name: data.name,
+        description: data.description || '',
+        price: parseFloat(data.price),
+        // Não atualizamos o tipo do produto para evitar problemas
+      }
+    });
+
+    return NextResponse.json(updatedProduct);
+  } catch (error) {
+    console.error('Erro ao atualizar produto:', error);
+    return NextResponse.json({ error: 'Erro ao atualizar produto' }, { status: 500 });
+  }
+}
