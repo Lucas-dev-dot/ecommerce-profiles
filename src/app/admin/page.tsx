@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react'
 interface DashboardStats {
   totalUsers: number
   totalOrders: number
-  totalRevenue: number
+  totalRevenue: any // Alterado para 'any' para aceitar diferentes tipos
   totalProfiles: number
 }
 
@@ -51,6 +51,29 @@ export default function AdminDashboard() {
     )
   }
 
+  // Função para formatar o valor da receita total
+  const formatRevenue = () => {
+    if (!stats) return "R$ 0.00";
+    
+    // Se totalRevenue for um objeto com toString()
+    if (typeof stats.totalRevenue === 'object' && stats.totalRevenue !== null) {
+      return `R$ ${stats.totalRevenue.toString()}`;
+    }
+    
+    // Se for uma string
+    if (typeof stats.totalRevenue === 'string') {
+      return `R$ ${parseFloat(stats.totalRevenue).toFixed(2)}`;
+    }
+    
+    // Se for um número
+    if (typeof stats.totalRevenue === 'number') {
+      return `R$ ${stats.totalRevenue.toFixed(2)}`;
+    }
+    
+    // Fallback
+    return "R$ 0.00";
+  };
+
   return (
     <div className="max-w-7xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">Painel Administrativo</h1>
@@ -72,12 +95,12 @@ export default function AdminDashboard() {
           <p className="text-3xl font-bold mt-2">{stats?.totalOrders || 0}</p>
         </div>
 
-        {/* <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-lg font-semibold text-gray-600">Receita Total</h3>
           <p className="text-3xl font-bold mt-2">
-            R$ {(stats?.totalRevenue || 0).toFixed(2)}
+            {formatRevenue()}
           </p>
-        </div> */}
+        </div>
 
         <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-lg font-semibold text-gray-600">Perfis Ativos</h3>
@@ -93,7 +116,7 @@ export default function AdminDashboard() {
               onClick={() => router.push('/admin/products/manage')}
               className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
             >
-              Gerenciar Perfis
+              Gerenciar Produtos
             </button>
             <button
               onClick={() => router.push('/admin/users')}
@@ -115,4 +138,4 @@ export default function AdminDashboard() {
       </div>
     </div>
   )
-} 
+}
