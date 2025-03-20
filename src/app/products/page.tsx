@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useCart } from '@/contexts/CartContext'
-import { Product as PrismaProduct, product_type } from '@prisma/client/edge'
+import { product_type } from '@prisma/client/edge'
 import { ProductCard } from '@/components/ProductCard'
 
 interface Product {
@@ -30,9 +30,9 @@ export default function Products() {
         setProducts(data)
       } catch (error: unknown) {
         if (error instanceof Error) {
-          setError(error.message) // Acesse o `message` do erro
+          setError(error.message)
         } else {
-          setError('Erro desconhecido') // Caso o erro não seja do tipo `Error`
+          setError('Erro desconhecido')
         }
       } finally {
         setLoading(false)
@@ -42,46 +42,72 @@ export default function Products() {
     loadProducts()
   }, [])
 
-  if (loading) return <div>Carregando...</div>
-  if (error) return <div>{error}</div>
+  if (loading) return (
+    <div className="min-h-screen bg-gradient-to-b from-[#0e0122] to-[#11052c] flex items-center justify-center">
+      <div className="text-white text-xl">Carregando...</div>
+    </div>
+  )
+  
+  if (error) return (
+    <div className="min-h-screen bg-gradient-to-b from-[#0e0122] to-[#11052c] flex items-center justify-center">
+      <div className="text-red-300 text-xl">{error}</div>
+    </div>
+  )
 
   return (
-    <div className="space-y-12">
-      <section>
-        <h2 className="text-2xl font-semibold mb-6">Perfis</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {products.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={{
-                id: product.id.toString(),
-                name: product.name,
-                price: product.price,
-                description: product.description,
-                type: product.type,
-              }}
-            />
-          ))}
-        </div>
-      </section>
+    <div className="min-h-screen bg-gradient-to-b from-[#0e0122] to-[#11052c]">
+      <div className="container mx-auto px-4 py-12 space-y-12">
+        <header className="mb-8 text-center">
+          <h1 className="text-4xl font-bold text-white mb-4">Nossos Produtos</h1>
+          <div className="w-24 h-1 bg-[#2c2979] mx-auto mb-6"></div>
+        </header>
+        
+        <section>
+          <h2 className="text-2xl font-semibold mb-6 text-white relative">
+            Perfis
+            <div className="w-20 h-1 bg-[#2c2979] mt-2"></div>
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {products
+              .filter(product => product.type === 'PROFILE')
+              .map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={{
+                    id: product.id.toString(),
+                    name: product.name,
+                    price: product.price,
+                    description: product.description,
+                    type: product.type,
+                  }}
+                />
+              ))}
+          </div>
+        </section>
 
-      <section>
-        <h2 className="text-2xl font-semibold mb-6">Proxies</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {products.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={{
-                id: product.id.toString(),
-                name: product.name,
-                price: product.price,
-                description: product.description,
-                type: product_type.PROXY,
-              }}
-            />
-          ))}
-        </div>
-      </section>
+        <section>
+          <h2 className="text-2xl font-semibold mb-6 text-white relative">
+            Proxies
+            <div className="w-20 h-1 bg-[#2c2979] mt-2"></div>
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {products
+              .filter(product => product.type === 'PROXY')
+              .map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={{
+                    id: product.id.toString(),
+                    name: product.name,
+                    price: product.price,
+                    description: product.description,
+                    type: product.type,
+                  }}
+                />
+              ))}
+          </div>
+        </section>
+      </div>
     </div>
   )
 }

@@ -1,106 +1,96 @@
 import { OrderItem } from "@prisma/client"
 import { getServerSession } from "next-auth"
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import prisma from '@/lib/prisma'
+import { authOptions } from "@/lib/auth";
 
-export async function POST(request: Request) {
-  const session = await getServerSession()
-
-  if (!session?.user?.email) {
-    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
-  }
-
+export async function POST(request: NextRequest) {
   try {
-    const { items, totalAmount } = await request.json()
-   
-    // First check available stock count
+    const session = await getServerSession(authOptions);
+    
+    if (!session) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+    }
+    
+    const body = await request.json();
+    const { items, totalAmount, couponCode } = body;
+    
+    // Buscar o usuário
+    const user = await prisma.user.findUnique({
+      where: { email: session.user?.email as string },
+    });
+    
+    if (!user) {
+      return NextResponse.json({ error: 'Usuário não encontrado' }, { status: 404 });
+    }
+    
+    // Verificar saldo
+    if (Number(user.balance) < totalAmount) {
+      return NextResponse.json({ error: 'Saldo insuficiente' }, { status: 400 });
+    }
+    
+    // Processar cupom se fornecido
+    let coupon = null;
+    if (couponCode) {
+      coupon = await prisma.coupon.findFirst({
+        where: { code: couponCode.toUpperCase() }
+      });
+      
+      if (coupon) {
+        // Incrementar o contador de uso do cupom
+        await prisma.coupon.update({
+          where: { id: coupon.id },
+          data: { usedCount: { increment: 1 } }
+        });
+      }
+    }
+    
+    // Criar o pedido
+    const order = await prisma.order.create({
+      data: {
+        userId: user.id,
+        totalAmount,
+        status: 'COMPLETED',
+        couponId: coupon?.id || null,
+        orderitem: {
+          create: items.map((item: any) => ({
+            productId: item.productId,
+            quantity: item.quantity,
+            price: item.price,
+          })),
+        },
+      },
+    });
+    
+    // Atualizar o saldo do usuário
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { balance: { decrement: totalAmount } },
+    });
+    
+    // Marcar os itens de estoque como usados
     for (const item of items) {
-      const availableStockCount = await prisma.stock.count({
+      const stockItem = await prisma.stock.findFirst({
         where: {
           productId: item.productId,
-          isUsed: false
-        }
-      })
+          isUsed: false,
+        },
+      });
 
-      if (availableStockCount < item.quantity) {
-        return NextResponse.json({
-          error: `Produto ${item.productId} tem apenas ${availableStockCount} unidades disponíveis`
-        }, { status: 400 })
+      if (stockItem) {
+        await prisma.stock.update({
+          where: { id: stockItem.id },
+          data: { 
+            isUsed: true,
+            userId: user.id,
+          },
+        });
       }
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email }
-    })
-
-    if (!user) {
-      return NextResponse.json({ error: 'Usuário não encontrado' }, { status: 404 })
-    }
-
-    if (user.balance < totalAmount) {
-      return NextResponse.json({ error: 'Saldo insuficiente' }, { status: 400 })
-    }
-
-    const order = await prisma.$transaction(async (tx) => {
-      const newOrder = await tx.order.create({
-        data: {
-          userId: user.id,
-          totalAmount,
-          status: 'COMPLETED',
-          orderitem: {
-            create: await Promise.all(items.map(async (item: OrderItem) => {
-              const stockItem = await tx.stock.findFirst({
-                where: {
-                  productId: item.productId,
-                  isUsed: false
-                }
-              })
-      
-              if (!stockItem) {
-                throw new Error(`No available stock found for product ${item.productId}`)
-              }
-      
-              // Update stock status
-              await tx.stock.update({
-                where: { id: stockItem.id },
-                data: { isUsed: true }
-              })
-      
-              return {
-                productId: item.productId,
-                quantity: item.quantity,
-                price: item.price
-              }
-            }))
-          }
-        },
-        include: {
-          orderitem: {
-            include: {
-              product: true
-            }
-          }
-        }
-      })
-      
-
-      await tx.user.update({
-        where: { id: user.id },
-        data: {
-          balance: {
-            decrement: totalAmount
-          }
-        }
-      })
-
-      return newOrder
-    })
-    return NextResponse.json(order)
+    return NextResponse.json(order);
   } catch (error) {
-    console.error('Erro ao criar pedido:', error)
-    return NextResponse.json(
-      { error: 'Erro ao processar pedido' },
-      { status: 500 }
-    )
+    console.error('Erro ao criar pedido:', error);
+    return NextResponse.json({ error: 'Erro ao criar pedido' }, { status: 500 });
   }
 }

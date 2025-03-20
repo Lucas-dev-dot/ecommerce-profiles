@@ -24,20 +24,13 @@ export function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCart()
   const { data: session } = useSession()
   const [isAdding, setIsAdding] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
 
   const handleAction = async () => {
     if (!session) {
       window.location.href = '/login'
       return
     }
-
-    // Remova esta condição para tratar proxies como perfis
-    // if (product.type === 'PROXY') {
-    //   // Redirecionar para WhatsApp
-    //   const message = `Olá, gostaria de informações sobre o proxy: ${product.name}`
-    //   window.open(`https://wa.me/5511999999999?text=${encodeURIComponent(message)}`, '_blank')
-    //   return
-    // }
 
     setIsAdding(true)
     try {
@@ -66,38 +59,53 @@ export function ProductCard({ product }: ProductCardProps) {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden">
-      <div className="relative h-48 w-full">
-        <Image
-          src={`/imagens/${product.imageUrl}`}
-          alt={product.name}
-          fill
-          sizes="(max-width: 400px) 50vw"
-          className="object-cover"
-        />
+    <div
+      className="bg-[#161243] rounded-lg shadow-lg overflow-hidden transition-all duration-300 hover:shadow-[0_0_15px_rgba(44,41,121,0.5)] border border-[#2c2979]/30 hover:-translate-y-1"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <div className="relative">
+        {/* Badge para mostrar o tipo de produto */}
+        <div className={`absolute top-2 right-2 z-10 px-3 py-1 text-xs font-semibold rounded-full ${
+          product.type === 'PROFILE' ? 'bg-[#2c2979] text-white' : 'bg-[#0e0122] text-white border border-[#2c2979]'
+        }`}>
+          {product.type === 'PROFILE' ? 'Perfil' : 'Proxy'}
+        </div>
+       
+        {/* Imagem com efeito de zoom suave ao passar o mouse */}
+        <div className="relative h-48 w-full overflow-hidden bg-[#11052c]">
+          <Image
+            src={`/imagens/${product.imageUrl}`}
+            alt={product.name}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className={`object-cover transition-transform duration-500 ${isHovered ? 'scale-110' : 'scale-100'}`}
+          />
+        </div>
       </div>
      
-      <div className="p-4">
-        <h3 className="text-lg font-semibold">{product.name}</h3>
-        <p className="text-gray-600 mt-1">{product.description}</p>
-        <p className="text-xl font-bold mt-2">R$ {Number(product.price).toFixed(2)}</p>
+      <div className="p-5">
+        <h3 className="text-lg font-semibold text-white mb-2">{product.name}</h3>
+        <p className="text-gray-300 text-sm h-12 overflow-hidden">{product.description}</p>
+       
+        <div className="mt-4">
+          <p className="text-2xl font-bold text-white">
+            R$ {Number(product.price).toFixed(2).replace('.', ',')}
+          </p>
+        </div>
        
         <button
           onClick={handleAction}
           disabled={isAdding}
-          className={`w-full mt-4 py-2 rounded transition-colors ${
+          className={`w-full mt-4 py-2.5 rounded-md transition-colors ${
             isAdding
-              ? 'bg-gray-400 cursor-not-allowed'
-              : 'bg-red-600 hover:bg-red-700 text-white'
+              ? 'bg-gray-600 cursor-not-allowed'
+              : 'bg-[#2c2979] hover:bg-[#2c2979]/80 text-white'
           }`}
         >
           {isAdding
             ? 'Adicionando...'
             : 'Adicionar ao Carrinho'
-            // Remova esta condição para mostrar o mesmo texto para todos os produtos
-            // : product.type === 'PROXY'
-            //   ? 'Solicitar Informações'
-            //   : 'Adicionar ao Carrinho'
           }
         </button>
       </div>

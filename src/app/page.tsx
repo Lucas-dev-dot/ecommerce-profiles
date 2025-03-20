@@ -27,9 +27,18 @@ export default async function Home() {
   }))
 
   return (
-    <main className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6">Nossos Produtos</h1>
-      <ProductList products={products} />
+    <main className="min-h-screen bg-gradient-to-b from-[#0e0122] to-[#11052c]">
+      <div className="container mx-auto px-4 py-12">
+        <header className="mb-12 text-center">
+          <h1 className="text-5xl font-bold text-white mb-4">Nossos Produtos</h1>
+          <div className="w-24 h-1 bg-[#2c2979] mx-auto mb-6"></div>
+          <p className="text-gray-300 max-w-2xl mx-auto">
+            Descubra nossa seleção exclusiva de produtos premium
+          </p>
+        </header>
+        
+        <ProductList products={products} />
+      </div>
     </main>
   )
-} 
+}

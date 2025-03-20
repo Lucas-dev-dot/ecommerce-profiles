@@ -79,96 +79,98 @@ export default function AddBalance() {
   }
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md mt-8">
-      <h1 className="text-2xl font-bold mb-6">Adicionar Saldo</h1>
-      
-      {error && (
-        <div className="mb-4 p-4 bg-red-100 text-red-700 rounded">
-          {error}
-        </div>
-      )}
-      
-      {!pixData ? (
-        <form onSubmit={handleAddBalance} className="space-y-4">
-          <div>
-            <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
-              Valor (R$)
-            </label>
-            <input
-              id="amount"
-              type="number"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="Digite o valor a adicionar"
-              aria-label="Valor em reais"
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              min="0"
-              step="0.01"
-            />
+    <div className="min-h-screen bg-gradient-to-b from-[#0e0122] to-[#11052c] py-12">
+      <div className="max-w-md mx-auto p-6 bg-[#161243] rounded-lg shadow-lg border border-[#2c2979]/30">
+        <h1 className="text-2xl font-bold mb-2 text-white">Adicionar Saldo</h1>
+        <div className="w-24 h-1 bg-[#2c2979] mb-6"></div>
+        
+        {error && (
+          <div className="mb-4 p-4 bg-red-900/20 text-red-300 rounded border border-red-400/30">
+            {error}
           </div>
-
-          <button
-            type="submit"
-            disabled={loading || !amount || Number(amount) <= 0}
-            className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 disabled:bg-gray-400"
-          >
-            {loading ? 'Gerando Pix...' : 'Gerar QR Code Pix'}
-          </button>
-        </form>
-      ) : (
-        <div className="text-center space-y-4">
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <p className="text-sm text-gray-600 mb-2">
-              Escaneie o QR Code abaixo ou copie o código Pix
-            </p>
-            
-            <div className="flex justify-center mb-4">
-              {/* Usando o componente QRCodeSVG da biblioteca qrcode.react */}
-              <QRCodeSVG 
-                value={pixData.qrCodeText} 
-                size={256}
-                bgColor={"#ffffff"}
-                fgColor={"#000000"}
-                level={"L"}
-                includeMargin={false}
+        )}
+        
+        {!pixData ? (
+          <form onSubmit={handleAddBalance} className="space-y-4">
+            <div>
+              <label htmlFor="amount" className="block text-sm font-medium text-gray-300 mb-1">
+                Valor (R$)
+              </label>
+              <input
+                id="amount"
+                type="number"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder="Digite o valor a adicionar"
+                aria-label="Valor em reais"
+                className="w-full px-3 py-2 bg-[#11052c] border border-[#2c2979]/30 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#2c2979]"
+                min="0"
+                step="0.01"
               />
             </div>
-            
-            <p className="text-xs text-gray-500 mb-2">
-              Válido até {formatExpirationTime(pixData.expiresAt)}
-            </p>
-            
+
             <button
-              onClick={handleCopyPixCode}
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700"
+              type="submit"
+              disabled={loading || !amount || Number(amount) <= 0}
+              className="w-full bg-[#2c2979] text-white py-2 px-4 rounded-md hover:bg-[#2c2979]/80 disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors"
             >
-              Copiar Código Pix
+              {loading ? 'Gerando Pix...' : 'Gerar QR Code Pix'}
             </button>
-          </div>
-          
-          <div className="mt-4">
-            <p className="text-sm text-gray-600 mb-2">
-              Após o pagamento, seu saldo será atualizado automaticamente.
-            </p>
+          </form>
+        ) : (
+          <div className="text-center space-y-4">
+            <div className="bg-[#11052c] p-4 rounded-lg border border-[#2c2979]/30">
+              <p className="text-sm text-gray-300 mb-2">
+                Escaneie o QR Code abaixo ou copie o código Pix
+              </p>
+              
+              <div className="flex justify-center mb-4 bg-white p-4 rounded-lg mx-auto max-w-[280px]">
+                <QRCodeSVG 
+                  value={pixData.qrCodeText} 
+                  size={256}
+                  bgColor={"#ffffff"}
+                  fgColor={"#000000"}
+                  level={"L"}
+                  includeMargin={false}
+                />
+              </div>
+              
+              <p className="text-xs text-gray-300 mb-2">
+                Válido até {formatExpirationTime(pixData.expiresAt)}
+              </p>
+              
+              <button
+                onClick={handleCopyPixCode}
+                className="w-full bg-[#2c2979] text-white py-2 px-4 rounded-md hover:bg-[#2c2979]/80 transition-colors"
+              >
+                Copiar Código Pix
+              </button>
+            </div>
             
-            <button
-              onClick={() => setPixData(null)}
-              className="text-blue-600 hover:underline"
-            >
-              Gerar novo Pix
-            </button>
+            <div className="mt-4">
+              <p className="text-sm text-gray-300 mb-2">
+                Após o pagamento, seu saldo será atualizado automaticamente.
+              </p>
+              
+              <button
+                onClick={() => setPixData(null)}
+                className="text-[#2c2979] hover:text-[#2c2979]/80 transition-colors"
+              >
+                Gerar novo Pix
+              </button>
+            </div>
+            
+            <div className="mt-4">
+              <button
+                onClick={() => router.push('/dashboard')}
+                className="text-gray-300 hover:text-white transition-colors"
+              >
+                Voltar para o Dashboard
+              </button>
+            </div>
           </div>
-          
-          <div className="mt-4">
-            <button
-              onClick={() => router.push('/dashboard')}
-              className="text-gray-600 hover:underline"
-            >
-              Voltar para o Dashboard
-            </button>
-          </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }

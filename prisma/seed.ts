@@ -42,18 +42,18 @@ async function main() {
   // Criar perfis
   await prisma.product.createMany({
     data: [
-      { name: 'Perfil Básico', price: 10.0, description: 'Perfil com funcionalidades básicas', type: 'PROFILE', userId: normalUser.id, imageUrl: 'perfil_básico.png' },
-      { name: 'Perfil Avançado', price: 20.0, description: 'Perfil com funcionalidades avançadas', type: 'PROFILE', userId: normalUser.id, imageUrl: 'perfil_avancado.png' },
-      { name: 'Perfil Premium', price: 30.0, description: 'Perfil com todas as funcionalidades', type: 'PROFILE', userId: normalUser.id, imageUrl: 'perfil_premium.png' },
+      { name: 'Perfil Pro', price: 10.0, description: 'Perfil com funcionalidades básicas', type: 'PROFILE', userId: normalUser.id, imageUrl: 'perfil_pro.png' },
+      { name: 'Business Manager', price: 20.0, description: 'Perfil com funcionalidades avançadas', type: 'PROFILE', userId: normalUser.id, imageUrl: 'business_manager.png' },
+      { name: 'Perfil Expert', price: 30.0, description: 'Perfil com todas as funcionalidades', type: 'PROFILE', userId: normalUser.id, imageUrl: 'perfil_expert.png' },
     ],
   });
 
   // Criar proxies - Agora usando o mesmo formato que os perfis
   await prisma.product.createMany({
     data: [
-      { name: 'Proxy Básico', price: 5.0, description: 'Proxy com velocidade básica', type: 'PROXY', userId: normalUser.id, imageUrl: 'proxy_básico.png' },
-      { name: 'Proxy Avançado', price: 15.0, description: 'Proxy com velocidade média', type: 'PROXY', userId: normalUser.id, imageUrl: 'proxy_avancado.png' },
-      { name: 'Proxy Premium', price: 25.0, description: 'Proxy com alta velocidade', type: 'PROXY', userId: normalUser.id, imageUrl: 'proxy_premium.png' },
+      { name: 'Proxy IPV4 SOCKS5', price: 5.0, description: 'Proxy com velocidade básica', type: 'PROXY', userId: normalUser.id, imageUrl: 'proxy_básico.png' },
+      { name: 'Proxy IPV6 SOCKS5', price: 15.0, description: 'Proxy com velocidade média', type: 'PROXY', userId: normalUser.id, imageUrl: 'proxy_avancado.png' },
+      { name: 'Proxy IPV6 HTTP', price: 25.0, description: 'Proxy com alta velocidade', type: 'PROXY', userId: normalUser.id, imageUrl: 'proxy_premium.png' },
     ],
   });
 

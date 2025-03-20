@@ -42,70 +42,76 @@ export default function ManageProducts() {
     ? products 
     : products.filter(product => product.type === filter)
 
-  if (loading) return <div>Carregando...</div>
+  if (loading) return (
+    <div className="min-h-screen bg-gradient-to-b from-[#0e0122] to-[#11052c] flex items-center justify-center">
+      <div className="text-white text-xl">Carregando...</div>
+    </div>
+  )
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Gerenciar Produtos</h1>
-      
-      <div className="mb-4">
-        <div className="flex space-x-2">
-          <button 
-            onClick={() => setFilter('ALL')}
-            className={`px-4 py-2 rounded ${filter === 'ALL' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
-          >
-            Todos
-          </button>
-          <button 
-            onClick={() => setFilter('PROFILE')}
-            className={`px-4 py-2 rounded ${filter === 'PROFILE' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
-          >
-            Perfis
-          </button>
-          <button 
-            onClick={() => setFilter('PROXY')}
-            className={`px-4 py-2 rounded ${filter === 'PROXY' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
-          >
-            Proxies
-          </button>
-        </div>
-      </div>
-      
-      <div className="grid gap-4">
-        {filteredProducts.map((product) => (
-          <div 
-            key={product.id} 
-            className="bg-white p-4 rounded-lg shadow flex justify-between items-center"
-          >
-            <div>
-              <h2 className="text-xl font-semibold">{product.name}</h2>
-              <p className="text-gray-600">{product.description}</p>
-              <p className="text-sm text-gray-500">
-                Tipo: {product.type}
-              </p>
-              <p className="text-sm text-gray-500">
-                Estoque: {product._count?.stock || 0}
-              </p>
-            </div>
-            
-            <div className="flex gap-2">
-              <Link
-                href={`/admin/products/edit/${product.id}`}
-                className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
-              >
-                Editar
-              </Link>
-              
-              {/* Remova a condição para mostrar o link de gerenciar estoque apenas para perfis */}
-              <Link
-                href={`/admin/products/stock/${product.id}`}
-                className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
-              >
-                Gerenciar Estoque
-              </Link>
-            </div>
+    <div className="min-h-screen bg-gradient-to-b from-[#0e0122] to-[#11052c] py-8">
+      <div className="container mx-auto p-4">
+        <h1 className="text-3xl font-bold mb-2 text-white">Gerenciar Produtos</h1>
+        <div className="w-32 h-1 bg-[#2c2979] mb-8"></div>
+        
+        <div className="mb-6">
+          <div className="flex space-x-2">
+            <button 
+              onClick={() => setFilter('ALL')}
+              className={`px-4 py-2 rounded transition-colors ${filter === 'ALL' ? 'bg-[#2c2979] text-white' : 'bg-[#161243] text-gray-300 border border-[#2c2979]/30'}`}
+            >
+              Todos
+            </button>
+            <button 
+              onClick={() => setFilter('PROFILE')}
+              className={`px-4 py-2 rounded transition-colors ${filter === 'PROFILE' ? 'bg-[#2c2979] text-white' : 'bg-[#161243] text-gray-300 border border-[#2c2979]/30'}`}
+            >
+              Perfis
+            </button>
+            <button 
+              onClick={() => setFilter('PROXY')}
+              className={`px-4 py-2 rounded transition-colors ${filter === 'PROXY' ? 'bg-[#2c2979] text-white' : 'bg-[#161243] text-gray-300 border border-[#2c2979]/30'}`}
+            >
+              Proxies
+            </button>
           </div>
-        ))}
+        </div>
+        
+        <div className="grid gap-4">
+          {filteredProducts.map((product) => (
+            <div 
+              key={product.id} 
+              className="bg-[#161243] p-4 rounded-lg shadow-lg flex justify-between items-center border border-[#2c2979]/30"
+            >
+              <div>
+                <h2 className="text-xl font-semibold text-white">{product.name}</h2>
+                <p className="text-gray-300">{product.description}</p>
+                <p className="text-sm text-gray-400">
+                  Tipo: {product.type}
+                </p>
+                <p className="text-sm text-gray-400">
+                  Estoque: {product._count?.stock || 0}
+                </p>
+              </div>
+              
+              <div className="flex gap-2">
+                <Link
+                  href={`/admin/products/edit/${product.id}`}
+                  className="bg-[#2c2979] text-white px-3 py-1 rounded hover:bg-[#2c2979]/80 transition-colors"
+                >
+                  Editar
+                </Link>
+                
+                <Link
+                  href={`/admin/products/stock/${product.id}`}
+                  className="bg-[#2c2979] text-white px-3 py-1 rounded hover:bg-[#2c2979]/80 transition-colors"
+                >
+                  Gerenciar Estoque
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   )

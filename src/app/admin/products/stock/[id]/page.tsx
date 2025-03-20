@@ -37,7 +37,6 @@ export default function ManageStock({ params }: { params: { id: string } }) {
 
       let totalItems = 0;
       
-      // Process each file
       for (const file of Array.from(files)) {
         const content = await file.text();
         console.log(`Processing file: ${file.name}`);
@@ -57,11 +56,9 @@ export default function ManageStock({ params }: { params: { id: string } }) {
         }
       }
 
-      // Mensagem dinâmica baseada no tipo do produto
       const itemType = product.type === 'PROFILE' ? 'perfis' : 'proxies';
       alert(`${totalItems} ${itemType} adicionados com sucesso!`);
       
-      // Recarregar os dados
       loadProduct();
     } catch (error) {
       console.error('Upload error:', error);
@@ -69,59 +66,77 @@ export default function ManageStock({ params }: { params: { id: string } }) {
     }
   };
 
-  if (loading) return <div className="p-4">Carregando...</div>
-  if (error) return <div className="p-4 text-red-600">{error}</div>
-  if (!product) return <div className="p-4">Produto não encontrado</div>
+  if (loading) return (
+    <div className="min-h-screen bg-gradient-to-b from-[#0e0122] to-[#11052c] flex items-center justify-center">
+      <div className="text-white text-xl">Carregando...</div>
+    </div>
+  )
 
-  // Texto dinâmico baseado no tipo do produto
+  if (error) return (
+    <div className="min-h-screen bg-gradient-to-b from-[#0e0122] to-[#11052c] flex items-center justify-center">
+      <div className="bg-red-900/20 border border-red-400/30 text-red-300 px-4 py-3 rounded">
+        {error}
+      </div>
+    </div>
+  )
+
+  if (!product) return (
+    <div className="min-h-screen bg-gradient-to-b from-[#0e0122] to-[#11052c] flex items-center justify-center">
+      <div className="text-white text-xl">Produto não encontrado</div>
+    </div>
+  )
+
   const itemType = product.type === 'PROFILE' ? 'perfil' : 'proxy';
   const itemTypePlural = product.type === 'PROFILE' ? 'perfis' : 'proxies';
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">
-        Gerenciar Estoque de {itemTypePlural}
-      </h1>
+    <div className="min-h-screen bg-gradient-to-b from-[#0e0122] to-[#11052c] py-8">
+      <div className="container mx-auto px-4">
+        <h1 className="text-3xl font-bold mb-2 text-white">
+          Gerenciar Estoque de {itemTypePlural}
+        </h1>
+        <div className="w-32 h-1 bg-[#2c2979] mb-8"></div>
       
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="mb-4">
-          <h2 className="text-xl font-semibold">{product.name}</h2>
-          <p className="text-gray-600">{product.description}</p>
-          <p className="text-sm text-gray-500">Tipo: {product.type}</p>
-        </div>
-
-        <div className="mb-6">
-          <p className="text-lg">
-            Quantidade em estoque: <span className="font-bold">{stockCount}</span>
-          </p>
-        </div>
-
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-4">
-            <label htmlFor="fileUpload" className="sr-only">Carregar arquivo</label>
-            <input
-              id="fileUpload"
-              type="file"
-              accept=".txt"
-              multiple
-              onChange={handleFileUpload}
-              className="block w-full text-sm text-gray-500
-                file:mr-4 file:py-2 file:px-4
-                file:rounded-full file:border-0
-                file:text-sm file:font-semibold
-                file:bg-violet-50 file:text-violet-700
-                hover:file:bg-violet-100"
-              aria-label={`Selecione um arquivo de ${itemType} para upload`}
-            />
+        <div className="bg-[#161243] rounded-lg shadow-lg p-6 border border-[#2c2979]/30">
+          <div className="mb-4">
+            <h2 className="text-xl font-semibold text-white">{product.name}</h2>
+            <p className="text-gray-300">{product.description}</p>
+            <p className="text-sm text-gray-400">Tipo: {product.type}</p>
           </div>
 
-          <div className="flex gap-4">
-            <button
-              onClick={() => router.push('/admin/products/manage')}
-              className="px-4 py-2 rounded bg-gray-500 hover:bg-gray-600 text-white"
-            >
-              Voltar
-            </button>
+          <div className="mb-6">
+            <p className="text-lg text-gray-300">
+              Quantidade em estoque: <span className="font-bold text-white">{stockCount}</span>
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-4">
+              <label htmlFor="fileUpload" className="sr-only">Carregar arquivo</label>
+              <input
+                id="fileUpload"
+                type="file"
+                accept=".txt"
+                multiple
+                onChange={handleFileUpload}
+                className="block w-full text-sm text-gray-300
+                  file:mr-4 file:py-2 file:px-4
+                  file:rounded-md file:border file:border-[#2c2979]/30
+                  file:text-sm file:font-semibold
+                  file:bg-[#2c2979] file:text-white
+                  hover:file:bg-[#2c2979]/80 file:transition-colors"
+                aria-label={`Selecione um arquivo de ${itemType} para upload`}
+              />
+            </div>
+
+            <div className="flex gap-4">
+              <button
+                onClick={() => router.push('/admin/products/manage')}
+                className="px-4 py-2 rounded bg-gray-600 hover:bg-gray-700 text-white transition-colors"
+              >
+                Voltar
+              </button>
+            </div>
           </div>
         </div>
       </div>

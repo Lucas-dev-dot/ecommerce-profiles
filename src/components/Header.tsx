@@ -55,7 +55,7 @@ export default function Header() {
   }
 
   return (
-    <header className="bg-zinc-800   text-white">
+    <header className="bg-[#161242]   text-white">
       <nav className="container mx-auto px-2 py-2">
         <div className="flex items-center justify-between">
         <Link href="/" className="text-xl font-bold flex items-center">

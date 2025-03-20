@@ -1,3 +1,41 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --bg-color1: #0e0122;
+  --bg-color2: #11052c;
+  --bg-color3: #161243;
+  --bg-color4: #2c2979;
+}
+
+body {
+  background: linear-gradient(to bottom, var(--bg-color1), var(--bg-color2));
+  color: white;
+  min-height: 100vh;
+}
+
+/* Estilização global para headings */
+h1, h2, h3, h4, h5, h6 {
+  color: white;
+}
+
+/* Estilização global para links */
+a {
+  color: white;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Estilização para botões primários */
+.btn-primary {
+  @apply bg-[#2c2979] text-white hover:bg-[#2c2979]/80 transition-colors;
+}
+
+/* Estilização para cards */
+.card {
+  @apply bg-[#161243] border border-[#2c2979]/30 rounded-lg shadow-lg;
+}

@@ -55,47 +55,63 @@ export default function Downloads() {
     }
   }, [session, orderId, router])
 
-  if (loading) return <div>Carregando...</div>
-  if (error) return <div className="text-red-600">{error}</div>
-  if (!order) return <div>Pedido não encontrado</div>
+  if (loading) return (
+    <div className="min-h-screen bg-gradient-to-b from-[#0e0122] to-[#11052c] flex items-center justify-center">
+      <div className="text-white text-xl">Carregando...</div>
+    </div>
+  )
+  
+  if (error) return (
+    <div className="min-h-screen bg-gradient-to-b from-[#0e0122] to-[#11052c] flex items-center justify-center">
+      <div className="text-red-300 bg-red-900/20 p-4 rounded">{error}</div>
+    </div>
+  )
+  
+  if (!order) return (
+    <div className="min-h-screen bg-gradient-to-b from-[#0e0122] to-[#11052c] flex items-center justify-center">
+      <div className="text-white text-xl">Pedido não encontrado</div>
+    </div>
+  )
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Downloads Disponíveis</h1>
-     
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold mb-4">
-          Pedido #{order.id} - {new Date(order.createdAt).toLocaleDateString()}
-        </h2>
+    <div className="min-h-screen bg-gradient-to-b from-[#0e0122] to-[#11052c] py-12">
+      <div className="max-w-4xl mx-auto px-4">
+        <h1 className="text-3xl font-bold mb-6 text-white">Downloads Disponíveis</h1>
+        <div className="w-24 h-1 bg-[#2c2979] mb-8"></div>
+       
+        <div className="bg-[#161243] rounded-lg shadow-lg p-6 border border-[#2c2979]/30">
+          <h2 className="text-xl font-semibold mb-4 text-white">
+            Pedido #{order.id} - {new Date(order.createdAt).toLocaleDateString()}
+          </h2>
 
-        <div className="space-y-4">
-          {order.orderItems.map(item => (
-            <div key={item.id} className="border p-4 rounded">
-              <h3 className="font-semibold">{item.product.name}</h3>
-              <p className="text-sm text-gray-500 mb-2">
-                Tipo: {item.product.type === 'PROFILE' ? 'Perfil' : 'Proxy'}
-              </p>
-              
-              {/* Modificado para incluir tanto PROFILE quanto PROXY */}
-              {(item.product.type === 'PROFILE' || item.product.type === 'PROXY') && (
-                <button
-                  onClick={() => window.open(`/api/downloads/${item.id}`, '_blank')}
-                  className="mt-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                >
-                  Download do {item.product.type === 'PROFILE' ? 'Perfil' : 'Proxy'}
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
+          <div className="space-y-4">
+            {order.orderItems.map(item => (
+              <div key={item.id} className="border border-[#2c2979]/30 p-4 rounded bg-[#11052c]">
+                <h3 className="font-semibold text-white">{item.product.name}</h3>
+                <p className="text-sm text-gray-300 mb-2">
+                  Tipo: {item.product.type === 'PROFILE' ? 'Perfil' : 'Proxy'}
+                </p>
+                
+                {(item.product.type === 'PROFILE' || item.product.type === 'PROXY') && (
+                  <button
+                    onClick={() => window.open(`/api/downloads/${item.id}`, '_blank')}
+                    className="mt-2 bg-[#2c2979] text-white px-4 py-2 rounded hover:bg-[#2c2979]/80 transition-colors"
+                  >
+                    Download do {item.product.type === 'PROFILE' ? 'Perfil' : 'Proxy'}
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
 
-        <div className="mt-6">
-          <button
-            onClick={() => router.push('/dashboard')}
-            className="text-blue-600 hover:underline"
-          >
-            Voltar para Minha Conta
-          </button>
+          <div className="mt-6">
+            <button
+              onClick={() => router.push('/dashboard')}
+              className="text-[#2c2979] hover:text-[#2c2979]/80 transition-colors"
+            >
+              Voltar para Minha Conta
+            </button>
+          </div>
         </div>
       </div>
     </div>

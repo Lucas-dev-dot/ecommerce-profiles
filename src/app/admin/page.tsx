@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react'
 interface DashboardStats {
   totalUsers: number
   totalOrders: number
-  totalRevenue: any // Alterado para 'any' para aceitar diferentes tipos
+  totalRevenue: any
   totalProfiles: number
 }
 
@@ -42,10 +42,10 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="min-h-screen bg-gradient-to-b from-[#0e0122] to-[#11052c] flex items-center justify-center">
         <div className="text-center">
-          <div className="text-xl font-semibold mb-2">Carregando...</div>
-          <div className="text-gray-500">Aguarde enquanto carregamos os dados</div>
+          <div className="text-xl font-semibold mb-2 text-white">Carregando...</div>
+          <div className="text-gray-300">Aguarde enquanto carregamos os dados</div>
         </div>
       </div>
     )
@@ -55,84 +55,89 @@ export default function AdminDashboard() {
   const formatRevenue = () => {
     if (!stats) return "R$ 0.00";
     
-    // Se totalRevenue for um objeto com toString()
     if (typeof stats.totalRevenue === 'object' && stats.totalRevenue !== null) {
       return `R$ ${stats.totalRevenue.toString()}`;
     }
     
-    // Se for uma string
     if (typeof stats.totalRevenue === 'string') {
       return `R$ ${parseFloat(stats.totalRevenue).toFixed(2)}`;
     }
     
-    // Se for um número
     if (typeof stats.totalRevenue === 'number') {
       return `R$ ${stats.totalRevenue.toFixed(2)}`;
     }
     
-    // Fallback
     return "R$ 0.00";
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Painel Administrativo</h1>
+    <div className="min-h-screen bg-gradient-to-b from-[#0e0122] to-[#11052c] py-8">
+      <div className="max-w-7xl mx-auto p-6">
+        <h1 className="text-3xl font-bold mb-2 text-white">Painel Administrativo</h1>
+        <div className="w-32 h-1 bg-[#2c2979] mb-8"></div>
 
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
-        </div>
-      )}
+        {error && (
+          <div className="bg-red-900/20 border border-red-400/30 text-red-300 px-4 py-3 rounded mb-4">
+            {error}
+          </div>
+        )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-lg font-semibold text-gray-600">Total de Usuários</h3>
-          <p className="text-3xl font-bold mt-2">{stats?.totalUsers || 0}</p>
-        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="bg-[#161243] rounded-lg shadow-lg p-6 border border-[#2c2979]/30">
+            <h3 className="text-lg font-semibold text-gray-300">Total de Usuários</h3>
+            <p className="text-3xl font-bold mt-2 text-white">{stats?.totalUsers || 0}</p>
+          </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-lg font-semibold text-gray-600">Total de Pedidos</h3>
-          <p className="text-3xl font-bold mt-2">{stats?.totalOrders || 0}</p>
-        </div>
+          <div className="bg-[#161243] rounded-lg shadow-lg p-6 border border-[#2c2979]/30">
+            <h3 className="text-lg font-semibold text-gray-300">Total de Pedidos</h3>
+            <p className="text-3xl font-bold mt-2 text-white">{stats?.totalOrders || 0}</p>
+          </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-lg font-semibold text-gray-600">Receita Total</h3>
-          <p className="text-3xl font-bold mt-2">
-            {formatRevenue()}
-          </p>
-        </div>
+          <div className="bg-[#161243] rounded-lg shadow-lg p-6 border border-[#2c2979]/30">
+            <h3 className="text-lg font-semibold text-gray-300">Receita Total</h3>
+            <p className="text-3xl font-bold mt-2 text-white">
+              {formatRevenue()}
+            </p>
+          </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-lg font-semibold text-gray-600">Perfis Ativos</h3>
-          <p className="text-3xl font-bold mt-2">{stats?.totalProfiles || 0}</p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold mb-4">Ações Rápidas</h2>
-          <div className="space-y-4">
-            <button
-              onClick={() => router.push('/admin/products/manage')}
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
-            >
-              Gerenciar Produtos
-            </button>
-            <button
-              onClick={() => router.push('/admin/users')}
-              className="w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700"
-            >
-              Gerenciar Usuários
-            </button>
+          <div className="bg-[#161243] rounded-lg shadow-lg p-6 border border-[#2c2979]/30">
+            <h3 className="text-lg font-semibold text-gray-300">Perfis Ativos</h3>
+            <p className="text-3xl font-bold mt-2 text-white">{stats?.totalProfiles || 0}</p>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold mb-4">Informações do Sistema</h2>
-          <div className="space-y-2">
-            <p><strong>Admin:</strong> {session?.user?.email}</p>
-            <p><strong>Status:</strong> <span className="text-green-600">Online</span></p>
-            <p><strong>Última atualização:</strong> {new Date().toLocaleString()}</p>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <div className="bg-[#161243] rounded-lg shadow-lg p-6 border border-[#2c2979]/30">
+            <h2 className="text-xl font-semibold mb-4 text-white">Ações Rápidas</h2>
+            <div className="space-y-4">
+              <button
+                onClick={() => router.push('/admin/products/manage')}
+                className="w-full bg-[#2c2979] text-white py-2 px-4 rounded hover:bg-[#2c2979]/80 transition-colors"
+              >
+                Gerenciar Produtos
+              </button>
+              <button
+                onClick={() => router.push('/admin/users')}
+                className="w-full bg-[#2c2979] text-white py-2 px-4 rounded hover:bg-[#2c2979]/80 transition-colors"
+              >
+                Gerenciar Usuários
+              </button>
+              <button
+                onClick={() => router.push('/admin/coupons')}
+                className="w-full bg-[#2c2979] text-white py-2 px-4 rounded hover:bg-[#2c2979]/80 transition-colors"
+              >
+                Gerenciar Cupons
+              </button>
+            </div>
+          </div>
+
+          <div className="bg-[#161243] rounded-lg shadow-lg p-6 border border-[#2c2979]/30">
+            <h2 className="text-xl font-semibold mb-4 text-white">Informações do Sistema</h2>
+            <div className="space-y-2 text-gray-300">
+              <p><strong className="text-white">Admin:</strong> {session?.user?.email}</p>
+              <p><strong className="text-white">Status:</strong> <span className="text-green-400">Online</span></p>
+              <p><strong className="text-white">Última atualização:</strong> {new Date().toLocaleString()}</p>
+            </div>
           </div>
         </div>
       </div>

@@ -25,6 +25,17 @@ enum transaction_type {
   PURCHASE
 }
 
+enum coupon_type {
+  PERCENTAGE
+  FIXED
+}
+
+enum order_status {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
 model User {
   id                   Int           @id @default(autoincrement())
   name                 String
@@ -60,6 +71,7 @@ model Product {
   user                      User?          @relation("UserProducts2", fields: [userId], references: [id])
   productstock              ProductStock[]
   stock                     Stock[]        
+  coupons                   Coupon[]       @relation("ProductCoupons")
 
   @@index([userId], map: "Product_userId_fkey")
 }
@@ -71,10 +83,13 @@ model Order {
   status      order_status
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
+  couponId    Int?
+  coupon      Coupon?      @relation(fields: [couponId], references: [id])
   user        User         @relation("UserOrders", fields: [userId], references: [id])
   orderitem   OrderItem[]  @relation("OrderItems")
 
   @@index([userId], map: "Order_userId_fkey")
+  @@index([couponId])
 }
 
 model OrderItem {
@@ -133,14 +148,19 @@ model Transaction {
   @@index([transactionId])
 }
 
-enum order_status {
-  PENDING
-  COMPLETED
-  CANCELLED
-}
+model Coupon {
+  id          Int         @id @default(autoincrement())
+  code        String      @unique
+  discount    Decimal     @db.Decimal(10, 2)
+  type        coupon_type
+  maxUses     Int         @default(1)
+  usedCount   Int         @default(0)
+  expiresAt   DateTime?
+  productId   Int?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  product     Product?    @relation("ProductCoupons", fields: [productId], references: [id])
+  orders      Order[]
 
-enum ProductType {
-  PROFILE
-  PROXY
-  // Adicione outros tipos conforme necessário
+  @@index([productId])
 }
