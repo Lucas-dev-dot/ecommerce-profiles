@@ -35,7 +35,7 @@ export default function AddBalance() {
     setError('')
     
     try {
-      const response = await fetch('/api/payments', {
+      const response = await fetch('/api/payments/pix', {  // URL corrigida
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

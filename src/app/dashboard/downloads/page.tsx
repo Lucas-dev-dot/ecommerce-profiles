@@ -107,7 +107,8 @@ export default function Downloads() {
           <div className="mt-6">
             <button
               onClick={() => router.push('/dashboard')}
-              className="text-[#2c2979] hover:text-[#2c2979]/80 transition-colors"
+              className="text-white
+               hover:text-[#2c2979]/80 transition-colors"
             >
               Voltar para Minha Conta
             </button>
