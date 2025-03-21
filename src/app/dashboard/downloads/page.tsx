@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 
 interface OrderItem {
   id: number
@@ -21,7 +21,8 @@ interface Order {
   createdAt: string
 }
 
-export default function Downloads() {
+// Componente cliente que usa useSearchParams
+function DownloadsContent() {
   const { data: session } = useSession()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -33,12 +34,17 @@ export default function Downloads() {
 
   useEffect(() => {
     if (!session) {
-      router.push('/login')
       return
     }
 
     async function loadOrder() {
       try {
+        if (!orderId) {
+          setError('ID do pedido não fornecido')
+          setLoading(false)
+          return
+        }
+        
         const response = await fetch(`/api/orders/${orderId}`)
         if (!response.ok) throw new Error('Erro ao carregar pedido')
         const data = await response.json()
@@ -50,23 +56,21 @@ export default function Downloads() {
       }
     }
 
-    if (orderId) {
-      loadOrder()
-    }
-  }, [session, orderId, router])
+    loadOrder()
+  }, [session, orderId])
 
   if (loading) return (
     <div className="min-h-screen bg-gradient-to-b from-[#0e0122] to-[#11052c] flex items-center justify-center">
       <div className="text-white text-xl">Carregando...</div>
     </div>
   )
-  
+ 
   if (error) return (
     <div className="min-h-screen bg-gradient-to-b from-[#0e0122] to-[#11052c] flex items-center justify-center">
       <div className="text-red-300 bg-red-900/20 p-4 rounded">{error}</div>
     </div>
   )
-  
+ 
   if (!order) return (
     <div className="min-h-screen bg-gradient-to-b from-[#0e0122] to-[#11052c] flex items-center justify-center">
       <div className="text-white text-xl">Pedido não encontrado</div>
@@ -91,7 +95,7 @@ export default function Downloads() {
                 <p className="text-sm text-gray-300 mb-2">
                   Tipo: {item.product.type === 'PROFILE' ? 'Perfil' : 'Proxy'}
                 </p>
-                
+               
                 {(item.product.type === 'PROFILE' || item.product.type === 'PROXY') && (
                   <button
                     onClick={() => window.open(`/api/downloads/${item.id}`, '_blank')}
@@ -107,8 +111,7 @@ export default function Downloads() {
           <div className="mt-6">
             <button
               onClick={() => router.push('/dashboard')}
-              className="text-white
-               hover:text-[#2c2979]/80 transition-colors"
+              className="text-white hover:text-[#2c2979]/80 transition-colors"
             >
               Voltar para Minha Conta
             </button>
@@ -116,5 +119,35 @@ export default function Downloads() {
         </div>
       </div>
     </div>
+  )
+}
+
+// Componente principal com Suspense
+export default function Downloads() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login')
+    }
+  }, [status, router])
+  
+  if (status === 'loading' || status === 'unauthenticated') {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-[#0e0122] to-[#11052c] flex items-center justify-center">
+        <div className="text-white text-xl">Carregando...</div>
+      </div>
+    )
+  }
+  
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-b from-[#0e0122] to-[#11052c] flex items-center justify-center">
+        <div className="text-white text-xl">Carregando detalhes do pedido...</div>
+      </div>
+    }>
+      <DownloadsContent />
+    </Suspense>
   )
 }

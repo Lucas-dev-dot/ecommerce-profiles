@@ -2,18 +2,18 @@
 
 import { useCart } from '@/contexts/CartContext'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { DownloadProfiles } from '@/components/DownloadProfiles'
 
 export default function Checkout() {
   const { items, clearCart, calculateTotal } = useCart()
   const router = useRouter()
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [showDownloads, setShowDownloads] = useState(false)
-  
+  const [showDownloads] = useState(false)
+
   // Novos estados para o cupom
   const [couponCode, setCouponCode] = useState('')
   const [couponLoading, setCouponLoading] = useState(false)
@@ -24,12 +24,26 @@ export default function Checkout() {
     type: 'PERCENTAGE' | 'FIXED';
   } | null>(null)
 
+  // Use useEffect para redirecionar em vez de fazer isso diretamente no corpo do componente
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login')
+    }
+  }, [status, router])
+  
+  // Se ainda estiver carregando ou não autenticado, mostre um estado de carregamento
+  if (status === 'loading' || status === 'unauthenticated') {
+    return <div className="min-h-screen bg-gradient-to-b from-[#0e0122] to-[#11052c] flex items-center justify-center">
+      <div className="text-white">Carregando...</div>
+    </div>
+  }
+
   // Função para calcular o total com desconto
   const calculateDiscountedTotal = () => {
     const total = calculateTotal();
-    
+   
     if (!appliedCoupon) return total;
-    
+   
     if (appliedCoupon.type === 'PERCENTAGE') {
       const discount = total * (appliedCoupon.discount / 100);
       return total - discount;
@@ -44,17 +58,17 @@ export default function Checkout() {
       setCouponError('Digite um código de cupom');
       return;
     }
-    
+   
     setCouponLoading(true);
     setCouponError('');
-    
+   
     try {
       const response = await fetch(`/api/coupons/validate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           code: couponCode,
           items: items.map(item => ({
             productId: item.id,
@@ -62,13 +76,13 @@ export default function Checkout() {
           }))
         }),
       });
-      
+     
       const data = await response.json();
-      
+     
       if (!response.ok) {
         throw new Error(data.error || 'Erro ao validar cupom');
       }
-      
+     
       setAppliedCoupon(data.coupon);
       setCouponCode('');
     } catch (error) {
@@ -89,7 +103,7 @@ export default function Checkout() {
     try {
       setLoading(true)
       setError('')
-  
+
       const response = await fetch('/api/orders', {
         method: 'POST',
         headers: {
@@ -106,7 +120,7 @@ export default function Checkout() {
           couponCode: appliedCoupon?.code || null
         })
       })
-  
+
       if (!response.ok) {
         if (response.status === 405) {
           throw new Error('Método não permitido')
@@ -114,7 +128,7 @@ export default function Checkout() {
         const errorData = await response.json()
         throw new Error(errorData.error || 'Erro ao processar pedido')
       }
-  
+
       const data = await response.json()
       clearCart()
       router.push(`/dashboard/downloads?order=${data.id}`)
@@ -124,11 +138,6 @@ export default function Checkout() {
     } finally {
       setLoading(false)
     }
-  }
-  
-  if (!session) {
-    router.push('/login')
-    return null
   }
 
   return (
@@ -147,7 +156,7 @@ export default function Checkout() {
 
             <div className="bg-[#161243] rounded-lg shadow-lg p-6 mb-6 border border-[#2c2979]/30">
               <h2 className="text-xl font-semibold mb-4 text-white">Resumo do Pedido</h2>
-              
+             
               {items.map((item) => (
                 <div key={item.id} className="flex justify-between py-2 border-b border-[#2c2979]/20">
                   <span className="text-white">{item.name}</span>
@@ -159,30 +168,30 @@ export default function Checkout() {
                 <span className="text-white">Subtotal</span>
                 <span className="text-white">R$ {calculateTotal().toFixed(2)}</span>
               </div>
-              
+             
               {/* Seção de cupom */}
               <div className="mt-6 pt-4 border-t border-[#2c2979]/20">
                 <h3 className="text-lg font-medium text-white mb-2">Cupom de desconto</h3>
-                
+               
                 {appliedCoupon ? (
                   <div className="bg-[#11052c] p-3 rounded-md border border-[#2c2979]/30 mb-3">
                     <div className="flex justify-between items-center">
                       <div>
                         <p className="text-white font-medium">{appliedCoupon.code}</p>
                         <p className="text-sm text-gray-300">
-                          {appliedCoupon.type === 'PERCENTAGE' 
-                            ? `${appliedCoupon.discount}% de desconto` 
+                          {appliedCoupon.type === 'PERCENTAGE'
+                            ? `${appliedCoupon.discount}% de desconto`
                             : `R$ ${appliedCoupon.discount.toFixed(2)} de desconto`}
                         </p>
                       </div>
-                      <button 
+                      <button
                         onClick={handleRemoveCoupon}
                         className="text-red-400 hover:text-red-300 text-sm"
                       >
                         Remover
                       </button>
                     </div>
-                    
+                   
                     <div className="mt-2 pt-2 border-t border-[#2c2979]/20 flex justify-between">
                       <span className="text-gray-300">Desconto:</span>
                       <span className="text-green-400">
@@ -212,12 +221,12 @@ export default function Checkout() {
                     </button>
                   </div>
                 )}
-                
+               
                 {couponError && (
                   <p className="text-red-400 text-sm mb-3">{couponError}</p>
                 )}
               </div>
-              
+             
               {/* Total com desconto */}
               <div className="flex justify-between mt-4 pt-4 border-t border-[#2c2979]/20 text-lg font-bold">
                 <span className="text-white">Total</span>

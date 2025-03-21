@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { QRCodeSVG } from 'qrcode.react'
@@ -16,11 +16,18 @@ export default function AddBalance() {
   } | null>(null)
   
   const router = useRouter()
-  const { data: session } = useSession()
-
-  if (!session) {
-    router.push('/login')
-    return null
+  const { data: session, status } = useSession()
+  
+  // Use useEffect para redirecionar, em vez de fazer isso diretamente no corpo do componente
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login')
+    }
+  }, [status, router])
+  
+  // Se ainda estiver carregando ou não autenticado, mostre um estado de carregamento
+  if (status === 'loading' || status === 'unauthenticated') {
+    return <div>Carregando...</div>
   }
 
   async function handleAddBalance(e: React.FormEvent) {
@@ -35,7 +42,7 @@ export default function AddBalance() {
     setError('')
     
     try {
-      const response = await fetch('/api/payments/pix', {  // URL corrigida
+      const response = await fetch('/api/payments/pix', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
